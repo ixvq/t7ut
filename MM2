@@ -257,7 +257,7 @@ antiFling()
 })
 
 local AntiVoidButton = SecurityTab:CreateButton({
-   Name = "Anti Void",
+   Name = "Anti Void (don't use before/while autofarming!)",
    Callback = function()
          local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
