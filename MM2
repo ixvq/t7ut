@@ -82,8 +82,10 @@ local Slider = MainTab:CreateSlider({
 })
 
 local TeleportSection = MainTab:CreateSection("Teleport Section")
-
-local Players = game:GetService("Players")
+local LobbyButton = MainTab:CreateButton({
+   Name = "Lobby",
+   Callback = function()
+         local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
@@ -107,7 +109,6 @@ local targetCFrame = CFrame.new(
 
 -- Call the function to teleport
 teleportAboveCFrame(targetCFrame)
-
    end,
 })
 
