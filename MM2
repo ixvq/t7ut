@@ -112,6 +112,34 @@ teleportAboveCFrame(targetCFrame)
    end,
 })
 
+local NoclipButton = MainTab:CreateButton({
+   Name = "Noclip",
+   Callback = function()
+         local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+local function enableNoclip()
+    -- Function to set CanCollide to false for all parts
+    local function noclip()
+        for _, part in pairs(character:GetDescendants()) do
+            if part:IsA("BasePart") and part.CanCollide then
+                part.CanCollide = false
+            end
+        end
+    end
+
+    -- Connect the noclip function to RunService's Stepped event
+    RunService.Stepped:Connect(noclip)
+end
+
+-- Enable noclip for the player
+enableNoclip()
+
+   end,
+})
+
 local AutofarmToggle = MainTab:CreateToggle({
    Name = "Autofarm",
    CurrentValue = false,
