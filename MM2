@@ -81,14 +81,9 @@ local Slider = MainTab:CreateSlider({
    end,
 })
 
-local TeleportDropdown = MainTab:CreateDropdown({
-   Name = "Select Teleportation",
-   Options = {"Lobby","Map"},
-   CurrentOption = {"nil"},
-   MultipleOptions = false,
-   Flag = "Teleport", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
-   Callback = function(Option)
-         local Players = game:GetService("Players")
+local TeleportSection = MainTab:CreateSection("Teleport Section")
+
+local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
@@ -110,13 +105,8 @@ local targetCFrame = CFrame.new(
     0.866048813, 0, -0.499959469         -- Rotation matrix row 3
 )
 
--- Reference to your dropdown menu and the specific button
-local lobbyButton = script.Parent:WaitForChild("TeleportDropdown"):WaitForChild("Lobby")
-
--- Connect the button click event to the teleportation function
-lobbyButton.MouseButton1Click:Connect(function()
-    teleportAboveCFrame(targetCFrame)
-end)
+-- Call the function to teleport
+teleportAboveCFrame(targetCFrame)
 
    end,
 })
