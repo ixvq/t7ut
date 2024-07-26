@@ -140,6 +140,78 @@ enableNoclip()
    end,
 })
 
+local Button = Tab:CreateButton({
+   Name = "Button Example",
+   Callback = function()
+         local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+-- Player and Character Setup
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+-- Variables
+local flying = false
+local flySpeed = 50  -- Adjust speed as needed
+local bodyVelocity
+local bodyGyro
+
+-- Function to start flying
+local function startFlying()
+    if flying then return end
+    flying = true
+
+    bodyVelocity = Instance.new("BodyVelocity")
+    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+    bodyVelocity.MaxForce = Vector3.new(1e6, 1e6, 1e6)
+    bodyVelocity.Parent = humanoidRootPart
+
+    bodyGyro = Instance.new("BodyGyro")
+    bodyGyro.CFrame = humanoidRootPart.CFrame
+    bodyGyro.MaxTorque = Vector3.new(1e6, 1e6, 1e6)
+    bodyGyro.P = 9e4
+    bodyGyro.Parent = humanoidRootPart
+end
+
+-- Function to stop flying
+local function stopFlying()
+    if not flying then return end
+    flying = false
+
+    if bodyVelocity then
+        bodyVelocity:Destroy()
+        bodyVelocity = nil
+    end
+    if bodyGyro then
+        bodyGyro:Destroy()
+        bodyGyro = nil
+    end
+end
+
+-- Main flying loop
+RunService.RenderStepped:Connect(function()
+    if flying then
+        bodyVelocity.Velocity = (humanoidRootPart.CFrame.LookVector * flySpeed) + Vector3.new(0, bodyVelocity.Velocity.Y, 0)
+        bodyGyro.CFrame = humanoidRootPart.CFrame
+    end
+end)
+
+-- Toggle flying with 'X' key
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.X then
+        if flying then
+            stopFlying()
+        else
+            startFlying()
+        end
+    end
+end)
+   end,
+})
+
 local AutofarmToggle = MainTab:CreateToggle({
    Name = "Autofarm",
    CurrentValue = false,
