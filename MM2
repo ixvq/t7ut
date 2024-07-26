@@ -169,3 +169,48 @@ for _, player in ipairs(game.Players:GetPlayers()) do
 end
    end,
 })
+
+local RoleButton = CombatTab:CreateButton({
+   Name = "Show roles",
+   Callback = function()
+   local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+-- Placeholder for role determination logic
+-- This should be set based on the game's logic (from server, etc.)
+local role = "Innocent" -- Possible values: "Murderer", "Sheriff", "Innocent"
+
+-- Function to change the character's color based on role
+local function changeColorBasedOnRole()
+    if character then
+        local color
+        if role == "Murderer" then
+            color = BrickColor.new("Bright red")
+        elseif role == "Sheriff" then
+            color = BrickColor.new("Bright blue")
+        elseif role == "Innocent" then
+            color = BrickColor.new("Bright green")
+        else
+            return -- If role is unknown, do nothing
+        end
+        
+        for _, part in pairs(character:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.BrickColor = color
+            end
+        end
+    end
+end
+
+-- Listen for when the character is added or respawned
+player.CharacterAdded:Connect(function(newCharacter)
+    character = newCharacter
+    changeColorBasedOnRole()
+end)
+
+-- Initial check
+changeColorBasedOnRole()
+
+   end,
+})
