@@ -69,13 +69,6 @@ end)
    end,
 })
 
-local NoclipButton = MainTab:CreateButton({
-   Name = "Noclip",
-   Callback = function()
-         print('hello world')
-   end,
-})
-
 local Slider = MainTab:CreateSlider({
    Name = "Walkspeed Slider",
    Range = {0, 300},
