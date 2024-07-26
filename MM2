@@ -100,40 +100,27 @@ local getNil = function(name, class)
     end
 end
 
-local function noclip()
-    character.Humanoid:ChangeState(11) -- Setting to 11 is one way to disable collision
-    for _, v in pairs(character:GetDescendants()) do
-        if v:IsA("BasePart") then
-            v.CanCollide = false
-        end
-    end
+local function simulateFall(targetPosition)
+    -- Simulate a fall by adjusting the player's velocity and using animations
+    local fallHeight = 70
+    local fallDuration = 1.5
+    local fallVelocity = Vector3.new(0, -fallHeight / fallDuration, 0)
+    
+    -- Adjust the player's position above the target
+    humanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(0, fallHeight, 0))
+    
+    -- Apply downward velocity to simulate falling
+    humanoidRootPart.Velocity = fallVelocity
+    
+    -- Wait for the fall to complete
+    wait(fallDuration)
+    
+    -- Stop the fall and place the player at the target position
+    humanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+    humanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(0, 5, 0)) -- Adjust height if needed
 end
 
-local function clip()
-    for _, v in pairs(character:GetDescendants()) do
-        if v:IsA("BasePart") then
-            v.CanCollide = true
-        end
-    end
-end
-
-local function moveTowardsPosition(targetPosition)
-    noclip()
-    local startPosition = humanoidRootPart.Position
-    local direction = (targetPosition - startPosition).unit
-    local distance = (targetPosition - startPosition).magnitude
-    local speed = 20 -- You can adjust the speed as needed
-
-    for i = 0, distance, speed / 60 do
-        humanoidRootPart.CFrame = CFrame.new(startPosition + direction * i)
-        wait(1/60)
-    end
-
-    humanoidRootPart.CFrame = CFrame.new(targetPosition)
-    clip()
-end
-
-local function moveToRandomBeachBall()
+local function teleportToRandomBeachBall()
     local gameModel = getNil("Game", "DataModel")
     if not gameModel then
         warn("Game model not found!")
@@ -156,18 +143,18 @@ local function moveToRandomBeachBall()
     local randomIndex = math.random(1, #objects)
     local selectedObject = objects[randomIndex]
 
-    -- Ensure the selected object is a BasePart and move the player
+    -- Ensure the selected object is a BasePart and simulate fall to the player
     if selectedObject:IsA("BasePart") then
-        moveTowardsPosition(selectedObject.Position + Vector3.new(0, 5, 0)) -- Adjust height if needed
+        simulateFall(selectedObject.Position)
     else
         warn("Selected object is not a BasePart!")
     end
 end
 
--- Main loop to move to random beach balls
+-- Main loop to simulate fall to random beach balls
 while true do
-    moveToRandomBeachBall()
-    wait(math.random(2, 2.4)) -- Random delay between moves
+    teleportToRandomBeachBall()
+    wait(math.random(1, 2)) -- Random delay between moves to avoid detection
 end
 
    end,
