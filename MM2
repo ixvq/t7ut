@@ -365,6 +365,64 @@ optimizeCharacter()
    end,
 })
 
+local Fps3Button = FpsTab:CreateButton({
+   Name = "FpsBoost3",
+   Callback = function()
+         -- Services
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+
+local player = Players.LocalPlayer
+
+-- Optimize physics throttling
+RunService:Set3dRenderingEnabled(false)  -- Disables 3D rendering, useful for bots or background tasks
+
+-- Function to optimize physics settings
+local function optimizePhysics()
+    -- Set Physics settings to a lower frequency for non-essential objects
+    local physicsService = game:GetService("PhysicsService")
+    physicsService.Throttle = Enum.ThrottleResetPriority.OccupantTimeout
+end
+
+-- Function to optimize rendering distance
+local function optimizeRenderingDistance()
+    -- Reduce the rendering distance for objects
+    for _, object in ipairs(workspace:GetDescendants()) do
+        if object:IsA("BasePart") or object:IsA("UnionOperation") or object:IsA("MeshPart") then
+            object.Changed:Connect(function(property)
+                if property == "Position" or property == "Size" then
+                    local distance = (object.Position - player.Character.HumanoidRootPart.Position).Magnitude
+                    if distance > 500 then  -- Adjust the distance threshold as needed
+                        object.Transparency = 1
+                    else
+                        object.Transparency = 0
+                    end
+                end
+            end)
+        end
+    end
+end
+
+-- Function to optimize GUI elements
+local function optimizeGUI()
+    -- Disable or minimize resource-heavy GUI elements
+    local playerGui = player:WaitForChild("PlayerGui")
+    for _, gui in ipairs(playerGui:GetChildren()) do
+        if gui:IsA("ScreenGui") then
+            gui.Enabled = false  -- Disable GUI elements to reduce draw calls
+        end
+    end
+end
+
+-- Call optimization functions
+optimizePhysics()
+optimizeRenderingDistance()
+optimizeGUI()
+
+   end,
+})
+
 local CombatTab = Window:CreateTab("Combat", nil) -- Title, Image
 local Section = CombatTab:CreateSection("For murder or sheriff")
 
