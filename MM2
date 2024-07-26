@@ -72,47 +72,7 @@ end)
 local NoclipButton = MainTab:CreateButton({
    Name = "Noclip",
    Callback = function()
-         -- Noclip.lua
-
-local player = ... -- Replace this with the method to get your player object
-local isNoclipEnabled = true -- Set this to false to disable noclip initially
-
-function enableNoclip()
-    if player then
-        player:SetCollisionEnabled(false) -- Disable collisions for the player
-        player:SetPhysicsEnabled(false) -- Disable physics if necessary
-    end
-end
-
-function disableNoclip()
-    if player then
-        player:SetCollisionEnabled(true) -- Enable collisions for the player
-        player:SetPhysicsEnabled(true) -- Enable physics if necessary
-    end
-end
-
--- Update function called every frame or at a fixed interval
-function update()
-    if isNoclipEnabled then
-        enableNoclip()
-    else
-        disableNoclip()
-    end
-
-    -- Add your player movement logic here
-end
-
--- Initial setup
-function init()
-    if isNoclipEnabled then
-        enableNoclip()
-    else
-        disableNoclip()
-    end
-end
-
-init()
-
+         print('hello world')
    end,
 })
 
