@@ -100,7 +100,7 @@ end
 
 local function simulateFall(targetPosition)
     -- Simulate a fall by adjusting the player's velocity and using animations
-    local fallHeight = 50
+    local fallHeight = 40
     local fallDuration = 1.5
     local fallVelocity = Vector3.new(0, -fallHeight / fallDuration, 0)
     
@@ -152,7 +152,7 @@ end
 -- Main loop to simulate fall to random beach balls
 while true do
     teleportToRandomBeachBall()
-    wait(math.random(4, 5)) -- Random delay between moves to avoid detection
+    wait(math.random(4, 4)) -- Random delay between moves to avoid detection
 end
 
    end,
