@@ -98,6 +98,26 @@ local getNil = function(name, class)
     end
 end
 
+local function simulateFall(targetPosition)
+    -- Simulate a fall by adjusting the player's velocity and using animations
+    local fallHeight = 50
+    local fallDuration = 1.5
+    local fallVelocity = Vector3.new(0, -fallHeight / fallDuration, 0)
+    
+    -- Adjust the player's position above the target
+    humanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(0, fallHeight, 0))
+    
+    -- Apply downward velocity to simulate falling
+    humanoidRootPart.Velocity = fallVelocity
+    
+    -- Wait for the fall to complete
+    wait(fallDuration)
+    
+    -- Stop the fall and place the player at the target position
+    humanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+    humanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(0, 5, 0)) -- Adjust height if needed
+end
+
 local function teleportToRandomBeachBall()
     local gameModel = getNil("Game", "DataModel")
     if not gameModel then
@@ -121,18 +141,18 @@ local function teleportToRandomBeachBall()
     local randomIndex = math.random(1, #objects)
     local selectedObject = objects[randomIndex]
 
-    -- Ensure the selected object is a BasePart and teleport the player
+    -- Ensure the selected object is a BasePart and simulate fall to the player
     if selectedObject:IsA("BasePart") then
-        humanoidRootPart.CFrame = CFrame.new(selectedObject.Position + Vector3.new(0, 5, 0)) -- Adjust height if needed
+        simulateFall(selectedObject.Position)
     else
         warn("Selected object is not a BasePart!")
     end
 end
 
--- Main loop to teleport to random beach balls
+-- Main loop to simulate fall to random beach balls
 while true do
     teleportToRandomBeachBall()
-    wait(3) -- Delay between teleports
+    wait(math.random(5, 10)) -- Random delay between moves to avoid detection
 end
 
    end,
