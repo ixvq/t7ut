@@ -102,7 +102,7 @@ end
 
 local function simulateFall(targetPosition)
     -- Simulate a fall by adjusting the player's velocity and using animations
-    local fallHeight = 40
+    local fallHeight = 50
     local fallDuration = 1.5
     local fallVelocity = Vector3.new(0, -fallHeight / fallDuration, 0)
     
