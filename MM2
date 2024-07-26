@@ -143,7 +143,8 @@ enableNoclip()
 local FlyButton = MainTab:CreateButton({
    Name = "Fly (X)",
    Callback = function()
-         local Players = game:GetService("Players")
+         -- Services
+local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 
@@ -151,6 +152,7 @@ local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+local humanoid = character:FindFirstChildOfClass("Humanoid")
 
 -- Variables
 local flying = false
@@ -162,6 +164,11 @@ local bodyGyro
 local function startFlying()
     if flying then return end
     flying = true
+
+    -- Disable the falling animation
+    if humanoid then
+        humanoid.PlatformStand = true
+    end
 
     bodyVelocity = Instance.new("BodyVelocity")
     bodyVelocity.Velocity = Vector3.new(0, 0, 0)
@@ -180,6 +187,11 @@ local function stopFlying()
     if not flying then return end
     flying = false
 
+    -- Re-enable the falling animation
+    if humanoid then
+        humanoid.PlatformStand = false
+    end
+
     if bodyVelocity then
         bodyVelocity:Destroy()
         bodyVelocity = nil
@@ -193,7 +205,10 @@ end
 -- Main flying loop
 RunService.RenderStepped:Connect(function()
     if flying then
-        bodyVelocity.Velocity = (humanoidRootPart.CFrame.LookVector * flySpeed) + Vector3.new(0, bodyVelocity.Velocity.Y, 0)
+        -- Update velocity to follow the camera's look direction
+        local camera = workspace.CurrentCamera
+        local lookDirection = camera.CFrame.LookVector
+        bodyVelocity.Velocity = lookDirection * flySpeed
         bodyGyro.CFrame = humanoidRootPart.CFrame
     end
 end)
@@ -209,6 +224,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
         end
     end
 end)
+
    end,
 })
 
