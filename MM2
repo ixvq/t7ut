@@ -84,80 +84,74 @@ local Slider = MainTab:CreateSlider({
 local AutofarmToggle = MainTab:CreateToggle({
    Name = "Autofarm",
    CurrentValue = false,
-   Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Flag = "Toggle1",
    Callback = function(Value)
-         local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+       local Players = game:GetService("Players")
+       local RunService = game:GetService("RunService")
+       local player = Players.LocalPlayer
+       local character = player.Character or player.CharacterAdded:Wait()
+       local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+       
+       local getNil = function(name, class)
+           for _, v in next, getnilinstances() do
+               if v.ClassName == class and v.Name == name then
+                   return v
+               end
+           end
+       end
+       
+       local function simulateFall(targetPosition)
+           local fallHeight = 70
+           local fallDuration = 1.5
+           local fallVelocity = Vector3.new(0, -fallHeight / fallDuration, 0)
+           
+           humanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(0, fallHeight, 0))
+           humanoidRootPart.Velocity = fallVelocity
+           wait(fallDuration)
+           humanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+           humanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(0, 5, 0))
+       end
+       
+       local function teleportToRandomBeachBall()
+           local gameModel = getNil("Game", "DataModel")
+           if not gameModel then
+               warn("Game model not found!")
+               return
+           end
 
-local getNil = function(name, class)
-    for _, v in next, getnilinstances() do
-        if v.ClassName == class and v.Name == name then
-            return v
-        end
-    end
-end
+           local coinContainer = gameModel.Workspace.Normal:FindFirstChild("CoinContainer")
+           if not coinContainer then
+               warn("CoinContainer not found!")
+               return
+           end
 
-local function simulateFall(targetPosition)
-    -- Simulate a fall by adjusting the player's velocity and using animations
-    local fallHeight = 70
-    local fallDuration = 1.5
-    local fallVelocity = Vector3.new(0, -fallHeight / fallDuration, 0)
-    
-    -- Adjust the player's position above the target
-    humanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(0, fallHeight, 0))
-    
-    -- Apply downward velocity to simulate falling
-    humanoidRootPart.Velocity = fallVelocity
-    
-    -- Wait for the fall to complete
-    wait(fallDuration)
-    
-    -- Stop the fall and place the player at the target position
-    humanoidRootPart.Velocity = Vector3.new(0, 0, 0)
-    humanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(0, 5, 0)) -- Adjust height if needed
-end
+           local objects = coinContainer:GetChildren()
+           if #objects == 0 then
+               warn("No objects found in CoinContainer!")
+               return
+           end
 
-local function teleportToRandomBeachBall()
-    local gameModel = getNil("Game", "DataModel")
-    if not gameModel then
-        warn("Game model not found!")
-        return
-    end
+           local randomIndex = math.random(1, #objects)
+           local selectedObject = objects[randomIndex]
 
-    local coinContainer = gameModel.Workspace.Normal:FindFirstChild("CoinContainer")
-    if not coinContainer then
-        warn("CoinContainer not found!")
-        return
-    end
+           if selectedObject:IsA("BasePart") then
+               simulateFall(selectedObject.Position)
+           else
+               warn("Selected object is not a BasePart!")
+           end
+       end
 
-    local objects = coinContainer:GetChildren()
-    if #objects == 0 then
-        warn("No objects found in CoinContainer!")
-        return
-    end
+       -- Track the state of the autofarm
+       _G.AutofarmActive = Value
 
-    -- Randomly select an object from the container
-    local randomIndex = math.random(1, #objects)
-    local selectedObject = objects[randomIndex]
-
-    -- Ensure the selected object is a BasePart and simulate fall to the player
-    if selectedObject:IsA("BasePart") then
-        simulateFall(selectedObject.Position)
-    else
-        warn("Selected object is not a BasePart!")
-    end
-end
-
--- Main loop to simulate fall to random beach balls
-while true do
-    teleportToRandomBeachBall()
-    wait(math.random(1, 1)) -- Random delay between moves to avoid detection
-end
-
-   end,
+       -- Start the autofarm loop
+       spawn(function()
+           while _G.AutofarmActive do
+               teleportToRandomBeachBall()
+               wait(math.random(1, 3)) -- Adjust the delay to avoid detection
+           end
+       end)
+   end
 })
 
 local FpsTab = Window:CreateTab("FPS", nil) -- Title, Image
