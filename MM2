@@ -1,4 +1,4 @@
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local Rayfield = loadstring(game:HttpGet('https://[Log in to view URL]'))()
 
 local Window = Rayfield:CreateWindow({
    Name = "🤍Loyal's MM2 Script🤍",
@@ -22,7 +22,7 @@ local Window = Rayfield:CreateWindow({
       FileName = "loyalhubkey", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
       SaveKey = false, -- The user's key will be saved, but if you change the key, they will be unable to use your script
       GrabKeyFromSite = true, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
-      Key = {"https://pastebin.com/raw/jyasz0sp"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
+      Key = {"https://[Log in to view URL]"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
    }
 })
 
@@ -81,11 +81,11 @@ local Slider = MainTab:CreateSlider({
    end,
 })
 
-local FPSTab = Window:CreateTab("FPS", nil) -- Title, Image
-local Section = MM2Tab:CreateSection("FPS")
+local FpsTab = Window:CreateTab("FPS", nil) -- Title, Image
+local Section = FpsTab:CreateSection("Choose Which FPS Boosts you want")
 
-local Button = FPSTab:CreateButton({
-   Name = "Boost FPS",
+local FpsButton = FpsTab:CreateButton({
+   Name = "Remove weapons+pets",
    Callback = function()
         local Workspace = game:GetService("Workspace")
 
@@ -101,24 +101,27 @@ end
    end,
 })
 
-local MiscTab = Window:CreateTab("🎲Misc", 4483362458) -- Title, Image
-local Section = MiscTab:CreateSection("Misc")
+local CombatTab = Window:CreateTab("Combat", nil) -- Title, Image
+local Section = CombatTab:CreateSection("For murder or sheriff")
 
-local Toggle = MiscTab:CreateToggle({
-   Name = "Auto Farm",
-   CurrentValue = false,
-   Flag = "toggleexample", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
-   Callback = function(Value)
-        print('hello')
-   end,
-})
+local KillallButton = CombatTab:CreateButton({
+   Name = "Kill all (Murder)",
+   Callback = function()
+        local Character = game.Players.LocalPlayer.Character
+local knife = Character and Character:FindFirstChild("Knife")
 
-local Input = MiscTab:CreateInput({
-   Name = "Jump Power",
-   PlaceholderText = "1-200",
-   RemoveTextAfterFocusLost = true,
-   Callback = function(Text)
-            game.Players.LocalPlayer.Character.Humanoid.JumpPower = (Text)
-
+for _, player in ipairs(game.Players:GetPlayers()) do
+    if player ~= game.Players.LocalPlayer then
+        wait()
+        local playerCharacter = player.Character
+        local humanoidRootPart = playerCharacter and playerCharacter:FindFirstChild("HumanoidRootPart")
+        
+        if humanoidRootPart then
+            Stab()
+            firetouchinterest(humanoidRootPart, knife.Handle, 1)
+            firetouchinterest(humanoidRootPart, knife.Handle, 0)
+        end
+    end
+end
    end,
 })
