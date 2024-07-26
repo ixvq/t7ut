@@ -380,6 +380,74 @@ end
    end,
 })
 
+local SilentAimButton = CombatTab:CreateButton({
+   Name = "Silent Aim",
+   Callback = function()
+         -- Services
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local HttpService = game:GetService("HttpService")
+
+-- Variables
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+local gun = --[[ Reference to your gun here, e.g., character:FindFirstChild("Gun") ]] -- Update this as necessary
+local ping = 60  -- Adjust ping (in milliseconds) based on your network latency
+
+-- Function to get the murderer
+local function getMurderer()
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= player and p.Character and p.Character:FindFirstChild("Humanoid") then
+            local humanoid = p.Character.Humanoid
+            if humanoid:FindFirstChild("IsMurderer") and humanoid.IsMurderer.Value then
+                return p.Character
+            end
+        end
+    end
+    return nil
+end
+
+-- Function to calculate future position of the target
+local function predictFuturePosition(target, pingMs)
+    local targetHumanoidRootPart = target:FindFirstChild("HumanoidRootPart")
+    if not targetHumanoidRootPart then return nil end
+
+    -- Calculate target velocity
+    local velocity = targetHumanoidRootPart.Velocity
+    local futurePosition = targetHumanoidRootPart.Position + (velocity * (pingMs / 1000))
+    
+    return futurePosition
+end
+
+-- Function to aim and shoot silently
+local function silentAimAndShoot(target)
+    if not gun then return end
+
+    local predictedPosition = predictFuturePosition(target, ping)
+    if not predictedPosition then return end
+
+    -- Calculate aim CFrame
+    local aimCFrame = CFrame.new(humanoidRootPart.Position, predictedPosition)
+
+    -- Update the gun's aim position
+    gun.CFrame = aimCFrame
+
+    -- Simulate shooting
+    gun.Fire() -- Replace with your gun's firing method
+end
+
+-- Main loop to continuously check and shoot
+RunService.RenderStepped:Connect(function()
+    local murderer = getMurderer()
+    if murderer then
+        silentAimAndShoot(murderer)
+    end
+end)
+
+   end,
+})
+
 local SecurityTab = Window:CreateTab("Security", nil) -- Title, Image
 local SecuritySection = SecurityTab:CreateSection("Secure urself using this!")
 
