@@ -154,7 +154,7 @@ end
 -- Main loop to simulate fall to random beach balls
 while true do
     teleportToRandomBeachBall()
-    wait(math.random(1, 2)) -- Random delay between moves to avoid detection
+    wait(math.random(1, 1)) -- Random delay between moves to avoid detection
 end
 
    end,
