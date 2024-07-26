@@ -98,40 +98,7 @@ local getNil = function(name, class)
     end
 end
 
-local function noclip()
-    character.Humanoid:ChangeState(11) -- Setting to 11 is one way to disable collision
-    for _, v in pairs(character:GetDescendants()) do
-        if v:IsA("BasePart") then
-            v.CanCollide = false
-        end
-    end
-end
-
-local function clip()
-    for _, v in pairs(character:GetDescendants()) do
-        if v:IsA("BasePart") then
-            v.CanCollide = true
-        end
-    end
-end
-
-local function floatToBeachBall(targetPosition)
-    noclip()
-    local startPosition = humanoidRootPart.Position
-    local direction = (targetPosition - startPosition).unit
-    local distance = (targetPosition - startPosition).magnitude
-    local speed = 50 -- You can adjust the speed as needed
-
-    for i = 0, distance, speed / 60 do
-        humanoidRootPart.CFrame = CFrame.new(startPosition + direction * i)
-        wait(1/60)
-    end
-
-    humanoidRootPart.CFrame = CFrame.new(targetPosition)
-    clip()
-end
-
-local function moveToRandomBeachBall()
+local function teleportToRandomBeachBall()
     local gameModel = getNil("Game", "DataModel")
     if not gameModel then
         warn("Game model not found!")
@@ -154,20 +121,19 @@ local function moveToRandomBeachBall()
     local randomIndex = math.random(1, #objects)
     local selectedObject = objects[randomIndex]
 
-    -- Ensure the selected object is a BasePart and float the player
+    -- Ensure the selected object is a BasePart and teleport the player
     if selectedObject:IsA("BasePart") then
-        floatToBeachBall(selectedObject.Position + Vector3.new(0, 5, 0)) -- Adjust height if needed
+        humanoidRootPart.CFrame = CFrame.new(selectedObject.Position + Vector3.new(0, 5, 0)) -- Adjust height if needed
     else
         warn("Selected object is not a BasePart!")
     end
 end
 
--- Main loop to float to random beach balls
+-- Main loop to teleport to random beach balls
 while true do
-    moveToRandomBeachBall()
-    wait(4) -- Delay for 4 seconds between moves to avoid detection
+    teleportToRandomBeachBall()
+    wait(6) -- Delay for 1 second between teleports
 end
-
 
    end,
 })
