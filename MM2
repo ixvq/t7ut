@@ -81,6 +81,46 @@ local Slider = MainTab:CreateSlider({
    end,
 })
 
+local TeleportDropdown = MainTab:CreateDropdown({
+   Name = "Select Teleportation",
+   Options = {"Lobby","Map"},
+   CurrentOption = {"nil"},
+   MultipleOptions = false,
+   Flag = "Teleport", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Option)
+         local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+-- Function to teleport the player 10 studs above the given CFrame
+local function teleportAboveCFrame(targetCFrame)
+    -- Offset the target CFrame by 10 studs in the Y-axis
+    local newCFrame = targetCFrame + Vector3.new(0, 10, 0)
+
+    -- Teleport the player's HumanoidRootPart to the new CFrame
+    humanoidRootPart.CFrame = newCFrame
+end
+
+-- The specified CFrame to teleport above
+local targetCFrame = CFrame.new(
+    -122.343071, 136.772766, 1.38007069, -- Position
+    -0.499959469, 0, -0.866048813,       -- Rotation matrix row 1
+    0, 1, 0,                             -- Rotation matrix row 2
+    0.866048813, 0, -0.499959469         -- Rotation matrix row 3
+)
+
+-- Reference to your dropdown menu and the specific button
+local lobbyButton = script.Parent:WaitForChild("TeleportDropdown"):WaitForChild("Lobby")
+
+-- Connect the button click event to the teleportation function
+lobbyButton.MouseButton1Click:Connect(function()
+    teleportAboveCFrame(targetCFrame)
+end)
+
+   end,
+})
+
 local AutofarmToggle = MainTab:CreateToggle({
    Name = "Autofarm",
    CurrentValue = false,
