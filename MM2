@@ -44,7 +44,7 @@ Rayfield:Notify({
 },
 })
 
-local Button = MainTab:CreateButton({
+local InfiniteJumpButton = MainTab:CreateButton({
    Name = "Infinite Jump",
    Callback = function()
    -- LocalScript
@@ -69,7 +69,7 @@ end)
    end,
 })
 
-local Slider = MainTab:CreateSlider({
+local WalkspeedSlider = MainTab:CreateSlider({
    Name = "Walkspeed Slider",
    Range = {0, 300},
    Increment = 1,
