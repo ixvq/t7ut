@@ -303,48 +303,65 @@ end
 local Fps2Button = FpsTab:CreateButton({
    Name = "FpsBoost2",
    Callback = function()
-         local Players = game:GetService("Players")
+         -- FPS Boost Script
+local RunService = game:GetService("RunService")
 local Lighting = game:GetService("Lighting")
+local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
 
 local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
 
--- Function to lower graphical settings
-local function lowerGraphicsSettings()
-    -- Disable global shadows
+-- Function to reduce the quality of graphics
+local function optimizeGraphics()
+    -- Set Lighting settings to low quality
     Lighting.GlobalShadows = false
-
-    -- Reduce the distance at which objects render
-    game.Lighting.FogEnd = 500  -- Lower this value to reduce render distance
-
-    -- Disable specific visual effects
+    Lighting.FogEnd = 1000
     Lighting.Brightness = 1
-    Lighting.OutdoorAmbient = Color3.fromRGB(127, 127, 127)
+    Lighting.ClockTime = 12
 
-    -- Adjust terrain decoration settings
-    if game.Workspace.Terrain then
-        game.Workspace.Terrain.Decoration = false
-    end
-
-    -- Disable textures for parts
-    local function disableTextures(object)
-        if object:IsA("Decal") or object:IsA("Texture") then
-            object:Destroy()  -- Remove textures and decals
-        elseif object:IsA("BasePart") then
-            object.Material = Enum.Material.Plastic
-            object.Reflectance = 0
+    -- Disable certain effects
+    for _, effect in ipairs(Lighting:GetChildren()) do
+        if effect:IsA("BlurEffect") or effect:IsA("SunRaysEffect") or effect:IsA("BloomEffect") then
+            effect.Enabled = false
         end
     end
-
-    -- Apply texture disabling to all existing parts and listen for new ones
-    for _, object in pairs(workspace:GetDescendants()) do
-        disableTextures(object)
-    end
-    workspace.DescendantAdded:Connect(disableTextures)
 end
 
--- Run the function to lower graphics settings
-lowerGraphicsSettings()
+-- Function to disable unneeded parts and reduce part quality
+local function reducePartQuality()
+    -- Iterate over all parts in the game
+    for _, object in ipairs(workspace:GetDescendants()) do
+        if object:IsA("Part") or object:IsA("UnionOperation") or object:IsA("MeshPart") then
+            object.Material = Enum.Material.SmoothPlastic
+            object.CastShadow = false
+        elseif object:IsA("ParticleEmitter") or object:IsA("Trail") then
+            object.Enabled = false
+        end
+    end
+end
+
+-- Function to optimize player character
+local function optimizeCharacter()
+    if player and player.Character then
+        for _, child in ipairs(player.Character:GetDescendants()) do
+            if child:IsA("BasePart") then
+                child.Material = Enum.Material.SmoothPlastic
+                child.CastShadow = false
+            elseif child:IsA("ParticleEmitter") or child:IsA("Trail") then
+                child.Enabled = false
+            end
+        end
+    end
+end
+
+-- Connect character added event
+player.CharacterAdded:Connect(optimizeCharacter)
+
+-- Call optimization functions
+optimizeGraphics()
+reducePartQuality()
+optimizeCharacter()
+
    end,
 })
 
