@@ -122,18 +122,20 @@ local function floatToPosition(targetPosition)
     local speed = 20 -- Speed of the floating movement
     local startPosition = humanoidRootPart.Position
     local travelVector = targetPosition - startPosition
+    local direction = travelVector.Unit
     local distance = travelVector.Magnitude
     local travelTime = distance / speed
     local startTime = tick()
 
-    RunService.RenderStepped:Connect(function()
+    local connection
+    connection = RunService.RenderStepped:Connect(function()
         local elapsedTime = tick() - startTime
         local progress = math.min(elapsedTime / travelTime, 1)
-        humanoidRootPart.CFrame = CFrame.new(startPosition:Lerp(targetPosition, progress))
-        
-        if progress == 1 then
+        humanoidRootPart.CFrame = CFrame.new(startPosition + direction * (distance * progress))
+
+        if progress >= 1 then
+            connection:Disconnect()
             clip()
-            return
         end
     end)
 
