@@ -81,47 +81,60 @@ local Slider = MainTab:CreateSlider({
    end,
 })
 
-local FlingButton = MainTab:CreateButton({
-   Name = "Fling",
+local AutofarmButton = MainTab:CreateButton({
+   Name = "Autofarm",
    Callback = function()
         local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
-local rootPart = character:WaitForChild("HumanoidRootPart")
-local spinSpeed = 100 -- Speed of spinning, adjust as needed
-local flingForce = 1000 -- Force to apply to other players
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
--- Function to make the character spin
-local function spin()
-    while true do
-        RunService.RenderStepped:Wait()
-        rootPart.CFrame = rootPart.CFrame * CFrame.Angles(0, math.rad(spinSpeed), 0)
+local getNil = function(name, class)
+    for _, v in next, getnilinstances() do
+        if v.ClassName == class and v.Name == name then
+            return v
+        end
     end
 end
 
--- Function to apply force to other players that touch the character
-local function onTouch(otherPart)
-    local otherHumanoid = otherPart.Parent:FindFirstChild("Humanoid")
-    if otherHumanoid and otherHumanoid ~= humanoid then
-        local bodyVelocity = Instance.new("BodyVelocity")
-        bodyVelocity.Velocity = (otherPart.Position - rootPart.Position).unit * flingForce
-        bodyVelocity.MaxForce = Vector3.new(1e6, 1e6, 1e6)
-        bodyVelocity.Parent = otherPart
-        game:GetService("Debris"):AddItem(bodyVelocity, 0.1) -- Remove the force after a short time
+local function teleportToRandomBeachBall()
+    local gameModel = getNil("Game", "DataModel")
+    if not gameModel then
+        warn("Game model not found!")
+        return
+    end
+
+    local coinContainer = gameModel.Workspace.Normal:FindFirstChild("CoinContainer")
+    if not coinContainer then
+        warn("CoinContainer not found!")
+        return
+    end
+
+    local objects = coinContainer:GetChildren()
+    if #objects == 0 then
+        warn("No objects found in CoinContainer!")
+        return
+    end
+
+    -- Randomly select an object from the container
+    local randomIndex = math.random(1, #objects)
+    local selectedObject = objects[randomIndex]
+
+    -- Ensure the selected object is a BasePart and teleport the player
+    if selectedObject:IsA("BasePart") then
+        humanoidRootPart.CFrame = CFrame.new(selectedObject.Position + Vector3.new(0, 5, 0)) -- Adjust height if needed
+    else
+        warn("Selected object is not a BasePart!")
     end
 end
 
--- Connect the onTouch function to the character's parts
-for _, part in pairs(character:GetChildren()) do
-    if part:IsA("BasePart") then
-        part.Touched:Connect(onTouch)
-    end
+-- Main loop to teleport to random beach balls
+while true do
+    teleportToRandomBeachBall()
+    wait(1) -- Delay for 1 second between teleports
 end
 
--- Start spinning
-spin()
    end,
 })
 
@@ -167,50 +180,5 @@ for _, player in ipairs(game.Players:GetPlayers()) do
         end
     end
 end
-   end,
-})
-
-local RoleButton = CombatTab:CreateButton({
-   Name = "Show roles",
-   Callback = function()
-   local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-
--- Placeholder for role determination logic
--- This should be set based on the game's logic (from server, etc.)
-local role = "Innocent" -- Possible values: "Murderer", "Sheriff", "Innocent"
-
--- Function to change the character's color based on role
-local function changeColorBasedOnRole()
-    if character then
-        local color
-        if role == "Murderer" then
-            color = BrickColor.new("Bright red")
-        elseif role == "Sheriff" then
-            color = BrickColor.new("Bright blue")
-        elseif role == "Innocent" then
-            color = BrickColor.new("Bright green")
-        else
-            return -- If role is unknown, do nothing
-        end
-        
-        for _, part in pairs(character:GetChildren()) do
-            if part:IsA("BasePart") then
-                part.BrickColor = color
-            end
-        end
-    end
-end
-
--- Listen for when the character is added or respawned
-player.CharacterAdded:Connect(function(newCharacter)
-    character = newCharacter
-    changeColorBasedOnRole()
-end)
-
--- Initial check
-changeColorBasedOnRole()
-
    end,
 })
