@@ -81,6 +81,50 @@ local Slider = MainTab:CreateSlider({
    end,
 })
 
+local FlingButton = MainTab:CreateButton({
+   Name = "Fling",
+   Callback = function()
+        local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local rootPart = character:WaitForChild("HumanoidRootPart")
+local spinSpeed = 100 -- Speed of spinning, adjust as needed
+local flingForce = 1000 -- Force to apply to other players
+
+-- Function to make the character spin
+local function spin()
+    while true do
+        RunService.RenderStepped:Wait()
+        rootPart.CFrame = rootPart.CFrame * CFrame.Angles(0, math.rad(spinSpeed), 0)
+    end
+end
+
+-- Function to apply force to other players that touch the character
+local function onTouch(otherPart)
+    local otherHumanoid = otherPart.Parent:FindFirstChild("Humanoid")
+    if otherHumanoid and otherHumanoid ~= humanoid then
+        local bodyVelocity = Instance.new("BodyVelocity")
+        bodyVelocity.Velocity = (otherPart.Position - rootPart.Position).unit * flingForce
+        bodyVelocity.MaxForce = Vector3.new(1e6, 1e6, 1e6)
+        bodyVelocity.Parent = otherPart
+        game:GetService("Debris"):AddItem(bodyVelocity, 0.1) -- Remove the force after a short time
+    end
+end
+
+-- Connect the onTouch function to the character's parts
+for _, part in pairs(character:GetChildren()) do
+    if part:IsA("BasePart") then
+        part.Touched:Connect(onTouch)
+    end
+end
+
+-- Start spinning
+spin()
+   end,
+})
+
 local FpsTab = Window:CreateTab("FPS", nil) -- Title, Image
 local Section = FpsTab:CreateSection("Choose Which FPS Boosts you want")
 
