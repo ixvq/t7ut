@@ -132,7 +132,7 @@ end
 -- Main loop to teleport to random beach balls
 while true do
     teleportToRandomBeachBall()
-    wait(6) -- Delay for 1 second between teleports
+    wait(1) -- Delay for 1 second between teleports
 end
 
    end,
