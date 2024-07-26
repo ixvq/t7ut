@@ -173,118 +173,24 @@ enableNoclip()
 local FlyButton = MainTab:CreateButton({
    Name = "Fly (X)",
    Callback = function()
-         -- Services
-local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-
--- Player and Character Setup
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-local humanoid = character:FindFirstChildOfClass("Humanoid")
-
--- Variables
+         local player = game.Players.LocalPlayer
+local character = player.Character
+local humanoid = character:WaitForChild("Humanoid")
+ 
 local flying = false
-local flySpeed = 50  -- Adjust speed as needed
-local bodyVelocity
-local bodyGyro
-local moveDirection = Vector3.new()
-
--- Function to start flying
-local function startFlying()
-    if flying then return end
-    flying = true
-
-    -- Disable the falling animation
-    if humanoid then
-        humanoid.PlatformStand = true
-    end
-
-    bodyVelocity = Instance.new("BodyVelocity")
-    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-    bodyVelocity.MaxForce = Vector3.new(1e6, 1e6, 1e6)
-    bodyVelocity.Parent = humanoidRootPart
-
-    bodyGyro = Instance.new("BodyGyro")
-    bodyGyro.CFrame = humanoidRootPart.CFrame
-    bodyGyro.MaxTorque = Vector3.new(1e6, 1e6, 1e6)
-    bodyGyro.P = 9e4
-    bodyGyro.Parent = humanoidRootPart
+ 
+local function toggleFly()
+    flying = not flying
+    humanoid.PlatformStand = flying
+    humanoid:Move(Vector3.new(0, 1000, 0))
 end
-
--- Function to stop flying
-local function stopFlying()
-    if not flying then return end
-    flying = false
-
-    -- Re-enable the falling animation
-    if humanoid then
-        humanoid.PlatformStand = false
-    end
-
-    if bodyVelocity then
-        bodyVelocity:Destroy()
-        bodyVelocity = nil
-    end
-    if bodyGyro then
-        bodyGyro:Destroy()
-        bodyGyro = nil
-    end
-end
-
--- Function to handle movement inputs
-local function updateMovement(input, gameProcessed)
-    if gameProcessed then return end
-    if flying then
-        local camera = workspace.CurrentCamera
-        local lookDirection = camera.CFrame.LookVector
-
-        -- Adjust velocity based on input
-        local moveDirection = Vector3.new()
-        if UserInputService:IsKeyDown(Enum.KeyCode.W) then
-            moveDirection = moveDirection + lookDirection
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.S) then
-            moveDirection = moveDirection - lookDirection
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.A) then
-            moveDirection = moveDirection - camera.CFrame.RightVector
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.D) then
-            moveDirection = moveDirection + camera.CFrame.RightVector
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
-            moveDirection = moveDirection + Vector3.new(0, 1, 0)
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
-            moveDirection = moveDirection - Vector3.new(0, 1, 0)
-        end
-        
-        -- Normalize the direction and update velocity
-        moveDirection = moveDirection.Unit * flySpeed
-        bodyVelocity.Velocity = moveDirection
-        bodyGyro.CFrame = humanoidRootPart.CFrame
-    end
-end
-
--- Main flying loop
-RunService.RenderStepped:Connect(function()
-    updateMovement()
-end)
-
--- Toggle flying with 'X' key
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-    if input.KeyCode == Enum.KeyCode.X then
-        if flying then
-            stopFlying()
-        else
-            startFlying()
-        end
+ 
+game:GetService("UserInputService").InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.F then
+        toggleFly()
     end
 end)
-
+ 
    end,
 })
 
