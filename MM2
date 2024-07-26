@@ -300,6 +300,54 @@ end
    end,
 })
 
+local Fps2Button = FpsTab:CreateButton({
+   Name = "FpsBoost2",
+   Callback = function()
+         local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+-- Function to lower graphical settings
+local function lowerGraphicsSettings()
+    -- Disable global shadows
+    Lighting.GlobalShadows = false
+
+    -- Reduce the distance at which objects render
+    game.Lighting.FogEnd = 500  -- Lower this value to reduce render distance
+
+    -- Disable specific visual effects
+    Lighting.Brightness = 1
+    Lighting.OutdoorAmbient = Color3.fromRGB(127, 127, 127)
+
+    -- Adjust terrain decoration settings
+    if game.Workspace.Terrain then
+        game.Workspace.Terrain.Decoration = false
+    end
+
+    -- Disable textures for parts
+    local function disableTextures(object)
+        if object:IsA("Decal") or object:IsA("Texture") then
+            object:Destroy()  -- Remove textures and decals
+        elseif object:IsA("BasePart") then
+            object.Material = Enum.Material.Plastic
+            object.Reflectance = 0
+        end
+    end
+
+    -- Apply texture disabling to all existing parts and listen for new ones
+    for _, object in pairs(workspace:GetDescendants()) do
+        disableTextures(object)
+    end
+    workspace.DescendantAdded:Connect(disableTextures)
+end
+
+-- Run the function to lower graphics settings
+lowerGraphicsSettings()
+   end,
+})
+
 local CombatTab = Window:CreateTab("Combat", nil) -- Title, Image
 local Section = CombatTab:CreateSection("For murder or sheriff")
 
