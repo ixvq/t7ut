@@ -213,77 +213,70 @@ local AutofarmToggle = MainTab:CreateToggle({
    Flag = "Toggle1",
    Callback = function(Value)
        local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+       local RunService = game:GetService("RunService")
+       local player = Players.LocalPlayer
+       local character = player.Character or player.CharacterAdded:Wait()
+       local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+       
+       local getNil = function(name, class)
+           for _, v in next, getnilinstances() do
+               if v.ClassName == class and v.Name == name then
+                   return v
+               end
+           end
+       end
+       
+       local function simulateFall(targetPosition)
+           local fallHeight = 70
+           local fallDuration = 1.5
+           local fallVelocity = Vector3.new(0, -fallHeight / fallDuration, 0)
+           
+           humanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(0, fallHeight, 0))
+           humanoidRootPart.Velocity = fallVelocity
+           wait(fallDuration)
+           humanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+           humanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(0, 5, 0))
+       end
+       
+       local function teleportToRandomBeachBall()
+           local gameModel = getNil("Game", "DataModel")
+           if not gameModel then
+               warn("Game model not found!")
+               return
+           end
 
--- Improved function to find the game model and coin container
-local function findCoinContainer()
-    local workspace = game:FindFirstChild("Workspace")
-    if not workspace then
-        warn("Workspace not found!")
-        return nil
-    end
+           local coinContainer = gameModel.Workspace.Normal:FindFirstChild("CoinContainer")
+           if not coinContainer then
+               warn("CoinContainer not found!")
+               return
+           end
 
-    -- Print all children of the workspace to help debug
-    for _, child in pairs(workspace:GetChildren()) do
-        print("Workspace child: " .. child.Name)
-    end
+           local objects = coinContainer:GetChildren()
+           if #objects == 0 then
+               warn("No objects found in CoinContainer!")
+               return
+           end
 
-    local coinContainer = workspace:FindFirstChild("CoinContainer")
-    if not coinContainer then
-        warn("CoinContainer not found in Workspace!")
-        return nil
-    end
+           local randomIndex = math.random(1, #objects)
+           local selectedObject = objects[randomIndex]
 
-    return coinContainer
-end
+           if selectedObject:IsA("BasePart") then
+               simulateFall(selectedObject.Position)
+           else
+               warn("Selected object is not a BasePart!")
+           end
+       end
 
-local function simulateFall(targetPosition)
-    local fallHeight = 70
-    local fallDuration = 1.5
-    local fallVelocity = Vector3.new(0, -fallHeight / fallDuration, 0)
+       -- Track the state of the autofarm
+       _G.AutofarmActive = Value
 
-    humanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(0, fallHeight, 0))
-    humanoidRootPart.Velocity = fallVelocity
-    wait(fallDuration)
-    humanoidRootPart.Velocity = Vector3.new(0, 0, 0)
-    humanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(0, 5, 0))
-end
-
-local function teleportToRandomBeachBall()
-    local coinContainer = findCoinContainer()
-    if not coinContainer then
-        return
-    end
-
-    local objects = coinContainer:GetChildren()
-    if #objects == 0 then
-        warn("No objects found in CoinContainer!")
-        return
-    end
-
-    local randomIndex = math.random(1, #objects)
-    local selectedObject = objects[randomIndex]
-
-    if selectedObject:IsA("BasePart") then
-        simulateFall(selectedObject.Position)
-    else
-        warn("Selected object is not a BasePart!")
-    end
-end
-
--- Track the state of the autofarm
-local autofarmActive = true
-
--- Start the autofarm loop
-spawn(function()
-    while autofarmActive do
-        teleportToRandomBeachBall()
-        wait(math.random(2, 3)) -- Adjust the delay to avoid detection
-    end
-end)
+       -- Start the autofarm loop
+       spawn(function()
+           while _G.AutofarmActive do
+               teleportToRandomBeachBall()
+               wait(math.random(2, 3)) -- Adjust the delay to avoid detection
+           end
+       end)
 
    end
 })
