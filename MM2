@@ -220,15 +220,20 @@ local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
 -- Improved function to find the game model and coin container
 local function findCoinContainer()
-    local gameModel = game:FindFirstChild("Workspace")
-    if not gameModel then
-        warn("Game model not found!")
+    local workspace = game:FindFirstChild("Workspace")
+    if not workspace then
+        warn("Workspace not found!")
         return nil
     end
 
-    local coinContainer = gameModel:FindFirstChild("CoinContainer")
+    -- Print all children of the workspace to help debug
+    for _, child in pairs(workspace:GetChildren()) do
+        print("Workspace child: " .. child.Name)
+    end
+
+    local coinContainer = workspace:FindFirstChild("CoinContainer")
     if not coinContainer then
-        warn("CoinContainer not found!")
+        warn("CoinContainer not found in Workspace!")
         return nil
     end
 
@@ -236,7 +241,7 @@ local function findCoinContainer()
 end
 
 local function simulateFall(targetPosition)
-    local fallHeight = 90
+    local fallHeight = 70
     local fallDuration = 1.5
     local fallVelocity = Vector3.new(0, -fallHeight / fallDuration, 0)
 
@@ -279,8 +284,6 @@ spawn(function()
         wait(math.random(2, 3)) -- Adjust the delay to avoid detection
     end
 end)
-
--- Optionally, you could add a way to stop the autofarm by setting `autofarmActive` to false.
 
    end
 })
