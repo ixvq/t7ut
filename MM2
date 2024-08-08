@@ -603,7 +603,6 @@ while true do
     grabGun()
     wait(2) -- Delay to avoid constant teleportation which could be detected as suspicious behavior
 end
-
    end,
 })
 
