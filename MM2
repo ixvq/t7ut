@@ -607,10 +607,6 @@ end
    end,
 })
 
-NEW BUTTON NEW BUTTON NEW BUTTON NEW BUTTON NEW BUTTON NEW BUTTON NEW BUTTON NEW BUTTON NEW BUTTON NEW BUTTON NEW BUTTON 
-   end,
-})
-
 local SecurityTab = Window:CreateTab("Security", nil) -- Title, Image
 local SecuritySection = SecurityTab:CreateSection("Secure urself using this!")
 
