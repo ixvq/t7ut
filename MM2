@@ -605,79 +605,32 @@ end
    end,
 })
 
-local SilentAimButton = CombatTab:CreateButton({
-   Name = "Silent Aim",
+local NormalizeAnimsAimButton = MainTab:CreateButton({
+   Name = "Normalize anims",
    Callback = function()
-         -- Services
-local Players = game:GetService("Players")
+         local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local Lighting = game:GetService("Lighting")
 
--- Colors
-local colors = {
-    Murderer = Color3.fromRGB(255, 0, 0),   -- Red
-    Sheriff = Color3.fromRGB(0, 0, 255),   -- Blue
-    Innocent = Color3.fromRGB(0, 255, 0)   -- Green
-}
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
 
--- Function to get player roles (replace with actual game role detection logic)
-local function getPlayerRole(player)
-    -- Example roles, replace this with the actual way to get player roles
-    local role = player:FindFirstChild("Role")
-    if role then
-        return role.Value
-    end
-    return nil
-end
+local desiredSpeed = 25
+local visualSpeed = 16
 
--- Function to apply glow to character
-local function applyGlow(character, color)
-    -- Create a new Glow effect
-    local glow = Instance.new("Highlight")
-    glow.Parent = character
-    glow.Adornee = character
-    glow.OutlineColor = color
-    glow.OutlineTransparency = 0 -- Change transparency as needed
-    glow.FillColor = color
-    glow.FillTransparency = 0.5 -- Adjust transparency as needed
-end
+local function adjustAnimationSpeed()
+    -- Normalize animation speed to look like the character is moving at visualSpeed
+    local speedRatio = visualSpeed / desiredSpeed
 
--- Function to clear existing glow
-local function clearGlow(character)
-    for _, v in ipairs(character:GetChildren()) do
-        if v:IsA("Highlight") then
-            v:Destroy()
-        end
+    for _, track in pairs(humanoid:GetPlayingAnimationTracks()) do
+        track:AdjustSpeed(speedRatio)
     end
 end
 
--- Function to update player roles
-local function updateRoles()
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local role = getPlayerRole(player)
-            local color = nil
+-- Set the desired speed and adjust animations accordingly
+humanoid.WalkSpeed = desiredSpeed
 
-            if role == "Murderer" then
-                color = colors.Murderer
-            elseif role == "Sheriff" then
-                color = colors.Sheriff
-            elseif role == "Innocent" then
-                color = colors.Innocent
-            end
-
-            if color then
-                clearGlow(player.Character)
-                applyGlow(player.Character, color)
-            end
-        end
-    end
-end
-
--- Continuously update player roles
-RunService.RenderStepped:Connect(function()
-    updateRoles()
-end)
+RunService.RenderStepped:Connect(adjustAnimationSpeed)
 
    end,
 })
