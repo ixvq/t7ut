@@ -183,7 +183,7 @@ enableNoclip()
    end,
 })
 
-local FlyButton = MainTab:CreateButton({
+local FlyButton = UniversalTab:CreateButton({
    Name = "Fly - E",
    Callback = function()
       local Players = game:GetService("Players")
