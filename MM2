@@ -707,31 +707,49 @@ local function createESP(player)
     box.Transparency = 1
     box.Filled = false
 
+    local nameTag = Drawing.new("Text")
+    nameTag.Visible = false
+    nameTag.Color = Color3.fromRGB(0, 255, 0)  -- Default color: Green
+    nameTag.Size = 20
+    nameTag.Center = true
+    nameTag.Outline = true
+    nameTag.Font = 2  -- Default font
+    nameTag.Text = player.Name
+
     local function updateESP()
         if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
             local rootPart = player.Character.HumanoidRootPart
             local vector, onScreen = Camera:WorldToViewportPoint(rootPart.Position)
-            
+
             if onScreen then
                 local size = Vector2.new(1000 / vector.Z, 1000 / vector.Z)
                 local position = Vector2.new(vector.X - size.X / 2, vector.Y - size.Y / 2)
+                local namePosition = Vector2.new(vector.X, vector.Y - size.Y / 2 - 15)
 
                 box.Size = size
                 box.Position = position
                 box.Visible = true
 
+                nameTag.Position = namePosition
+                nameTag.Visible = true
+
                 if player.Backpack:FindFirstChild("Gun") or (player.Character:FindFirstChild("Gun") and player.Character.Gun.Parent == player.Character) then
                     box.Color = Color3.fromRGB(0, 0, 255)  -- Blue for sheriff
+                    nameTag.Color = Color3.fromRGB(0, 0, 255)  -- Blue for sheriff
                 elseif player.Backpack:FindFirstChild("Knife") or (player.Character:FindFirstChild("Knife") and player.Character.Knife.Parent == player.Character) then
                     box.Color = Color3.fromRGB(255, 0, 0)  -- Red for murderer
+                    nameTag.Color = Color3.fromRGB(255, 0, 0)  -- Red for murderer
                 else
                     box.Color = Color3.fromRGB(0, 255, 0)  -- Green for innocent
+                    nameTag.Color = Color3.fromRGB(0, 255, 0)  -- Green for innocent
                 end
             else
                 box.Visible = false
+                nameTag.Visible = false
             end
         else
             box.Visible = false
+            nameTag.Visible = false
         end
     end
 
@@ -752,7 +770,7 @@ end)
 
 Players.PlayerRemoving:Connect(function(player)
     if player ~= Players.LocalPlayer then
-        -- Clean up ESP box when a player leaves
+        -- Clean up ESP box and nameTag when a player leaves
     end
 end)
 
