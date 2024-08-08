@@ -1,3 +1,4 @@
+
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
@@ -184,26 +185,88 @@ enableNoclip()
 })
 
 local FlyButton = MainTab:CreateButton({
-   Name = "Fly (X)",
+   Name = "Fly",
    Callback = function()
-         local player = game.Players.LocalPlayer
-local character = player.Character
-local humanoid = character:WaitForChild("Humanoid")
- 
+      local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
 local flying = false
- 
-local function toggleFly()
-    flying = not flying
-    humanoid.PlatformStand = flying
-    humanoid:Move(Vector3.new(0, 1000, 0))
+local speed = 50
+local bodyVelocity
+local bodyGyro
+
+local function startFlying()
+    if flying then return end
+    flying = true
+
+    bodyVelocity = Instance.new("BodyVelocity")
+    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+    bodyVelocity.MaxForce = Vector3.new(100000, 100000, 100000)
+    bodyVelocity.P = 1000
+    bodyVelocity.Parent = humanoidRootPart
+
+    bodyGyro = Instance.new("BodyGyro")
+    bodyGyro.MaxTorque = Vector3.new(100000, 100000, 100000)
+    bodyGyro.CFrame = humanoidRootPart.CFrame
+    bodyGyro.P = 1000
+    bodyGyro.Parent = humanoidRootPart
+
+    local function fly()
+        local camera = workspace.CurrentCamera
+        local moveDirection = Vector3.new(0, 0, 0)
+
+        if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+            moveDirection = moveDirection + (camera.CFrame.LookVector)
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+            moveDirection = moveDirection - (camera.CFrame.LookVector)
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+            moveDirection = moveDirection - (camera.CFrame.RightVector)
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+            moveDirection = moveDirection + (camera.CFrame.RightVector)
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+            moveDirection = moveDirection + Vector3.new(0, 1, 0)
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+            moveDirection = moveDirection - Vector3.new(0, 1, 0)
+        end
+
+        bodyVelocity.Velocity = moveDirection * speed
+        bodyGyro.CFrame = camera.CFrame
+    end
+
+    RunService.RenderStepped:Connect(fly)
 end
- 
-game:GetService("UserInputService").InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.F then
-        toggleFly()
+
+local function stopFlying()
+    if not flying then return end
+    flying = false
+
+    if bodyVelocity then
+        bodyVelocity:Destroy()
+    end
+    if bodyGyro then
+        bodyGyro:Destroy()
+    end
+end
+
+UserInputService.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.E then  -- Press "E" to toggle flying
+        if flying then
+            stopFlying()
+        else
+            startFlying()
+        end
     end
 end)
- 
    end,
 })
 
@@ -541,84 +604,6 @@ while true do
     grabGun()
     wait(2) -- Delay to avoid constant teleportation which could be detected as suspicious behavior
 end
-
-   end,
-})
-
-local SilentAimButton = CombatTab:CreateButton({
-   Name = "Silent Aim",
-   Callback = function()
-         -- Services
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local Lighting = game:GetService("Lighting")
-
--- Colors
-local colors = {
-    Murderer = Color3.fromRGB(255, 0, 0),   -- Red
-    Sheriff = Color3.fromRGB(0, 0, 255),   -- Blue
-    Innocent = Color3.fromRGB(0, 255, 0)   -- Green
-}
-
--- Function to get player roles (replace with actual game role detection logic)
-local function getPlayerRole(player)
-    -- Example roles, replace this with the actual way to get player roles
-    local role = player:FindFirstChild("Role")
-    if role then
-        return role.Value
-    end
-    return nil
-end
-
--- Function to apply glow to character
-local function applyGlow(character, color)
-    -- Create a new Glow effect
-    local glow = Instance.new("Highlight")
-    glow.Parent = character
-    glow.Adornee = character
-    glow.OutlineColor = color
-    glow.OutlineTransparency = 0 -- Change transparency as needed
-    glow.FillColor = color
-    glow.FillTransparency = 0.5 -- Adjust transparency as needed
-end
-
--- Function to clear existing glow
-local function clearGlow(character)
-    for _, v in ipairs(character:GetChildren()) do
-        if v:IsA("Highlight") then
-            v:Destroy()
-        end
-    end
-end
-
--- Function to update player roles
-local function updateRoles()
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local role = getPlayerRole(player)
-            local color = nil
-
-            if role == "Murderer" then
-                color = colors.Murderer
-            elseif role == "Sheriff" then
-                color = colors.Sheriff
-            elseif role == "Innocent" then
-                color = colors.Innocent
-            end
-
-            if color then
-                clearGlow(player.Character)
-                applyGlow(player.Character, color)
-            end
-        end
-    end
-end
-
--- Continuously update player roles
-RunService.RenderStepped:Connect(function()
-    updateRoles()
-end)
-
    end,
 })
 
