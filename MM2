@@ -712,7 +712,7 @@ local function createESP(player)
     nameTag.Color = Color3.fromRGB(0, 255, 0)  -- Default color: Green
     nameTag.Size = 20
     nameTag.Center = true
-    nameTag.Outline = true
+    nameTag.Outline = false  -- No outline
     nameTag.Font = 5  -- Font 3 is smoother than Font 2
     nameTag.Text = player.Name
 
@@ -738,12 +738,15 @@ local function createESP(player)
                 if player.Backpack:FindFirstChild("Gun") or (player.Character:FindFirstChild("Gun") and player.Character.Gun.Parent == player.Character) then
                     box.Color = Color3.fromRGB(0, 0, 255)  -- Blue for sheriff
                     nameTag.Color = Color3.fromRGB(0, 0, 255)  -- Blue for sheriff
+                    box.Thickness = 2  -- Outline for blue
                 elseif player.Backpack:FindFirstChild("Knife") or (player.Character:FindFirstChild("Knife") and player.Character.Knife.Parent == player.Character) then
                     box.Color = Color3.fromRGB(255, 0, 0)  -- Red for murderer
                     nameTag.Color = Color3.fromRGB(255, 0, 0)  -- Red for murderer
+                    box.Thickness = 2  -- Outline for red
                 else
                     box.Color = Color3.fromRGB(0, 255, 0)  -- Green for innocent
                     nameTag.Color = Color3.fromRGB(0, 255, 0)  -- Green for innocent
+                    box.Thickness = 0  -- No outline for green
                 end
             else
                 box.Visible = false
