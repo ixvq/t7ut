@@ -781,3 +781,48 @@ end)
 
    end,
 })
+
+local ChamsButton = VisualsTab:CreateButton({
+   Name = "Player chams",
+   Callback = function()
+      local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local function createChams(player)
+    if player == Players.LocalPlayer then return end  -- Don't create chams for the local player
+
+    -- Create the Highlight instance
+    local highlight = Instance.new("Highlight")
+    highlight.Parent = game.Workspace
+    highlight.Adornee = player.Character
+    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop  -- Makes it visible through walls
+
+    local function updateChams()
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            if player.Backpack:FindFirstChild("Gun") or (player.Character:FindFirstChild("Gun") and player.Character.Gun.Parent == player.Character) then
+                highlight.FillColor = Color3.fromRGB(0, 0, 255)  -- Blue for sheriff
+            elseif player.Backpack:FindFirstChild("Knife") or (player.Character:FindFirstChild("Knife") and player.Character.Knife.Parent == player.Character) then
+                highlight.FillColor = Color3.fromRGB(255, 0, 0)  -- Red for murderer
+            else
+                highlight.FillColor = Color3.fromRGB(0, 255, 0)  -- Green for innocent
+            end
+
+            highlight.FillTransparency = 0.5  -- Semi-transparent chams
+            highlight.OutlineTransparency = 1  -- No outline
+        end
+    end
+
+    -- Update chams every frame
+    RunService.RenderStepped:Connect(updateChams)
+end
+
+-- Apply chams to all existing players
+for _, player in pairs(Players:GetPlayers()) do
+    createChams(player)
+end
+
+-- Apply chams to players who join later
+Players.PlayerAdded:Connect(function(player)
+    createChams(player)
+end)
+   end,
+})
