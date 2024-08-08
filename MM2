@@ -787,14 +787,14 @@ local ChamsButton = VisualsTab:CreateButton({
    Callback = function()
       local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+
 local function createChams(player)
     if player == Players.LocalPlayer then return end  -- Don't create chams for the local player
 
-    -- Create the Highlight instance
     local highlight = Instance.new("Highlight")
-    highlight.Parent = game.Workspace
-    highlight.Adornee = player.Character
     highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop  -- Makes it visible through walls
+    highlight.FillTransparency = 0.5  -- Semi-transparent chams
+    highlight.OutlineTransparency = 1  -- No outline
 
     local function updateChams()
         if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
@@ -805,9 +805,11 @@ local function createChams(player)
             else
                 highlight.FillColor = Color3.fromRGB(0, 255, 0)  -- Green for innocent
             end
-
-            highlight.FillTransparency = 0.5  -- Semi-transparent chams
-            highlight.OutlineTransparency = 1  -- No outline
+            
+            highlight.Adornee = player.Character  -- Ensure the highlight is adorning the character
+            highlight.Parent = player.Character   -- Set the highlight parent to the player's character
+        else
+            highlight.Parent = nil  -- If the character is not valid, temporarily remove the highlight
         end
     end
 
@@ -817,12 +819,27 @@ end
 
 -- Apply chams to all existing players
 for _, player in pairs(Players:GetPlayers()) do
-    createChams(player)
+    if player.Character then
+        createChams(player)
+    end
+    player.CharacterAdded:Connect(function()
+        createChams(player)
+    end)
 end
 
 -- Apply chams to players who join later
 Players.PlayerAdded:Connect(function(player)
-    createChams(player)
+    player.CharacterAdded:Connect(function()
+        createChams(player)
+    end)
 end)
+
+-- Clean up chams when a player leaves
+Players.PlayerRemoving:Connect(function(player)
+    if player.Character and player.Character:FindFirstChildOfClass("Highlight") then
+        player.Character:FindFirstChildOfClass("Highlight"):Destroy()
+    end
+end)
+
    end,
 })
