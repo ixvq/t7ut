@@ -226,9 +226,22 @@ local getNil = function(name, class)
     end
 end
 
+local function enableNoClip()
+    local function noClip()
+        for _, v in pairs(character:GetDescendants()) do
+            if v:IsA("BasePart") and v.CanCollide then
+                v.CanCollide = false
+            end
+        end
+    end
+
+    RunService.Stepped:Connect(noClip)
+end
+
 local function moveToTarget(targetPosition)
     local offsetUnderMap = Vector3.new(0, -3, 0) -- Adjust the Y offset to stay under the map but not fall through
-    humanoidRootPart.CFrame = CFrame.new(targetPosition + offsetUnderMap)
+    local riseOffset = Vector3.new(0, 5, 0) -- Rise the character slightly to collect the coin
+    humanoidRootPart.CFrame = CFrame.new(targetPosition + offsetUnderMap + riseOffset)
 end
 
 local function findNearestObject()
@@ -285,6 +298,9 @@ spawn(function()
         wait(3) -- Fixed 3-second delay
     end
 end)
+
+-- Enable no-clip
+enableNoClip()
 
 -- Anti-detection basic measures
 local function kickProtection()
