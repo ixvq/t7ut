@@ -795,9 +795,17 @@ local function createChams(player)
     highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop  -- Makes it visible through walls
     highlight.FillTransparency = 0.5  -- Semi-transparent chams
     highlight.OutlineTransparency = 1  -- No outline
+    highlight.Parent = player.Character  -- Initially parent to the character
 
     local function updateChams()
         if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            -- Attach highlight to the character if it got detached for any reason
+            if highlight.Adornee ~= player.Character then
+                highlight.Adornee = player.Character
+                highlight.Parent = player.Character
+            end
+
+            -- Determine the player's role and set the color
             if player.Backpack:FindFirstChild("Gun") or (player.Character:FindFirstChild("Gun") and player.Character.Gun.Parent == player.Character) then
                 highlight.FillColor = Color3.fromRGB(0, 0, 255)  -- Blue for sheriff
             elseif player.Backpack:FindFirstChild("Knife") or (player.Character:FindFirstChild("Knife") and player.Character.Knife.Parent == player.Character) then
@@ -805,16 +813,21 @@ local function createChams(player)
             else
                 highlight.FillColor = Color3.fromRGB(0, 255, 0)  -- Green for innocent
             end
-            
-            highlight.Adornee = player.Character  -- Ensure the highlight is adorning the character
-            highlight.Parent = player.Character   -- Set the highlight parent to the player's character
         else
             highlight.Parent = nil  -- If the character is not valid, temporarily remove the highlight
         end
     end
 
     -- Update chams every frame
-    RunService.RenderStepped:Connect(updateChams)
+    local connection
+    connection = RunService.RenderStepped:Connect(function()
+        if not player or not player.Parent then
+            highlight:Destroy()  -- Clean up the highlight if the player leaves or is removed
+            connection:Disconnect()
+        else
+            updateChams()
+        end
+    end)
 end
 
 -- Apply chams to all existing players
@@ -836,8 +849,11 @@ end)
 
 -- Clean up chams when a player leaves
 Players.PlayerRemoving:Connect(function(player)
-    if player.Character and player.Character:FindFirstChildOfClass("Highlight") then
-        player.Character:FindFirstChildOfClass("Highlight"):Destroy()
+    if player.Character then
+        local highlight = player.Character:FindFirstChildOfClass("Highlight")
+        if highlight then
+            highlight:Destroy()
+        end
     end
 end)
 
