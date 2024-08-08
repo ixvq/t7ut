@@ -213,10 +213,12 @@ local AutofarmToggle = MainTab:CreateToggle({
    Flag = "Toggle1",
    Callback = function(Value)
        local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
-local function getNil(name, class)
+local getNil = function(name, class)
     for _, v in next, getnilinstances() do
         if v.ClassName == class and v.Name == name then
             return v
@@ -224,38 +226,65 @@ local function getNil(name, class)
     end
 end
 
-local function findNearestBeachBall()
-    local beachBalls = getNil("Game", "DataModel").ReplicatedStorage.Coins.BeachBallObjects:GetChildren()
-    local nearestBeachBall = nil
+local function moveToTarget(targetPosition)
+    local offsetUnderMap = Vector3.new(0, -3, 0) -- Adjust the Y offset to stay under the map but not fall through
+    humanoidRootPart.CFrame = CFrame.new(targetPosition + offsetUnderMap)
+end
+
+local function findNearestObject()
+    local gameModel = getNil("Game", "DataModel")
+    if not gameModel then
+        warn("Game model not found!")
+        return
+    end
+
+    local coinContainer = gameModel.Workspace.Normal:FindFirstChild("CoinContainer")
+    if not coinContainer then
+        warn("CoinContainer not found!")
+        return
+    end
+
+    local objects = coinContainer:GetChildren()
+    if #objects == 0 then
+        warn("No objects found in CoinContainer!")
+        return
+    end
+
+    local nearestObject = nil
     local shortestDistance = math.huge
 
-    for _, beachBall in pairs(beachBalls) do
-        local distance = (LocalPlayer.Character.HumanoidRootPart.Position - beachBall.Position).magnitude
-        if distance < shortestDistance then
-            shortestDistance = distance
-            nearestBeachBall = beachBall
+    for _, obj in pairs(objects) do
+        if obj:IsA("BasePart") then
+            local distance = (humanoidRootPart.Position - obj.Position).magnitude
+            if distance < shortestDistance then
+                shortestDistance = distance
+                nearestObject = obj
+            end
         end
     end
 
-    return nearestBeachBall
+    return nearestObject
 end
 
-local function moveToBeachBall(beachBall)
-    local character = LocalPlayer.Character
-    if character and character:FindFirstChild("HumanoidRootPart") then
-        character.HumanoidRootPart.CFrame = CFrame.new(beachBall.Position)
+local function teleportToNearestObject()
+    local nearestObject = findNearestObject()
+    if nearestObject then
+        moveToTarget(nearestObject.Position)
+    else
+        warn("No nearest object found!")
     end
 end
 
-local function main()
-    while true do
-        local nearestBeachBall = findNearestBeachBall()
-        if nearestBeachBall then
-            moveToBeachBall(nearestBeachBall)
-        end
-        wait(1) -- Adjust the wait time as needed
+-- Track the state of the autofarm
+_G.AutofarmActive = true
+
+-- Start the autofarm loop
+spawn(function()
+    while _G.AutofarmActive do
+        teleportToNearestObject()
+        wait(3) -- Fixed 3-second delay
     end
-end
+end)
 
 -- Anti-detection basic measures
 local function kickProtection()
@@ -273,7 +302,6 @@ local function kickProtection()
 end
 
 kickProtection()
-main()
 
    end
 })
