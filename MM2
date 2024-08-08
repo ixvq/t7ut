@@ -874,3 +874,30 @@ end)
 
    end,
 })
+
+local GrabGunButton = CombatTab:CreateButton({
+   Name = "Grab Gun",
+   Callback = function()
+      local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local originalPosition = nil
+
+-- Function to teleport to the gun
+local function teleportToGun(gun)
+    originalPosition = character.HumanoidRootPart.CFrame
+    character.HumanoidRootPart.CFrame = gun.CFrame + Vector3.new(0, 0.5, 0) -- Teleport slightly above the gun's position
+
+    wait(0.5) -- Wait for 0.5 seconds
+
+    character.HumanoidRootPart.CFrame = originalPosition -- Teleport back to original position
+end
+
+-- Detect when a gun is dropped (This part depends on your specific game and may need adjustments)
+game.Workspace.ChildAdded:Connect(function(child)
+    if child:IsA("Part") and child.Name == "Gun" then
+        teleportToGun(child)
+    end
+end)
+
+   end,
+})
