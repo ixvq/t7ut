@@ -553,57 +553,33 @@ end
    end,
 })
 
-local GrabGunButton = CombatTab:CreateButton({
-   Name = "Grab Gun",
+local NormalizeAnimsButton = MainTab:CreateButton({
+   Name = "Normalize Anims",
    Callback = function()
          local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
-local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+local humanoid = character:WaitForChild("Humanoid")
 
-local getNil = function(name, class)
-    for _, v in next, getnilinstances() do
-        if v.ClassName == class and v.Name == name then
-            return v
-        end
+local desiredSpeed = 25
+local visualSpeed = 16
+
+local function adjustAnimationSpeed()
+    -- Normalize animation speed to look like the character is moving at visualSpeed
+    local speedRatio = visualSpeed / desiredSpeed
+
+    for _, track in pairs(humanoid:GetPlayingAnimationTracks()) do
+        track:AdjustSpeed(speedRatio)
     end
 end
 
-local initialPosition
+-- Set the desired speed and adjust animations accordingly
+humanoid.WalkSpeed = desiredSpeed
 
-local function grabGun()
-    -- Store the player's initial position
-    initialPosition = humanoidRootPart.Position
+RunService.RenderStepped:Connect(adjustAnimationSpeed)
 
-    local gameModel = getNil("Game", "DataModel")
-    if not gameModel then
-        warn("Game model not found!")
-        return
-    end
-
-    -- Assuming the gun can be accessed via this path or similar
-    local gun = gameModel.Workspace.Normal:GetChildren()[8].HumanoidRootPart
-    if not gun then
-        warn("Gun not found!")
-        return
-    end
-
-    -- Teleport the player to the gun's position
-    humanoidRootPart.CFrame = CFrame.new(gun.Position + Vector3.new(0, 3, 0)) -- Slight offset to avoid exact overlap
-
-    -- Wait a short moment to simulate the grab
-    wait(0.5)
-
-    -- Teleport back to the original position
-    humanoidRootPart.CFrame = CFrame.new(initialPosition)
-end
-
--- Monitor the game for the gun and teleport to it when detected
-while true do
-    grabGun()
-    wait(2) -- Delay to avoid constant teleportation which could be detected as suspicious behavior
-end
    end,
 })
 
