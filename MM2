@@ -534,22 +534,37 @@ local Section = CombatTab:CreateSection("For murder or sheriff")
 local KillallButton = CombatTab:CreateButton({
    Name = "Kill all (Murder)",
    Callback = function()
-        local Character = game.Players.LocalPlayer.Character
-local knife = Character and Character:FindFirstChild("Knife")
+        local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local Knife = Character:FindFirstChild("Knife") -- Ensure this is the correct name
 
-for _, player in ipairs(game.Players:GetPlayers()) do
-    if player ~= game.Players.LocalPlayer then
-        wait()
-        local playerCharacter = player.Character
-        local humanoidRootPart = playerCharacter and playerCharacter:FindFirstChild("HumanoidRootPart")
-        
-        if humanoidRootPart then
-            Stab()
-            firetouchinterest(humanoidRootPart, knife.Handle, 1)
-            firetouchinterest(humanoidRootPart, knife.Handle, 0)
+-- Function to simulate the stabbing action
+local function Stab()
+    if Knife and Knife:FindFirstChild("Handle") then
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character then
+                local humanoidRootPart = player.Character:FindFirstChild("HumanoidRootPart")
+                if humanoidRootPart then
+                    -- Simulate touch interaction with the knife
+                    firetouchinterest(humanoidRootPart, Knife.Handle, 1)
+                    firetouchinterest(humanoidRootPart, Knife.Handle, 0)
+                end
+            end
         end
     end
 end
+
+-- Check if the knife is equipped, and if not, equip it
+if Knife and not Knife.Parent:IsA("Tool") then
+    LocalPlayer.Backpack:WaitForChild(Knife.Name).Parent = Character
+end
+
+-- Call Stab function when the knife is equipped
+Knife.Equipped:Connect(function()
+    Stab()
+end)
+
    end,
 })
 
