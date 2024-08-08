@@ -90,6 +90,9 @@ Players.PlayerRemoving:Connect(function(player)
     end
 end)
 
+   end,
+})
+
 local MainTab = Window:CreateTab("Universal", nil) -- Title, Image
 local MainSection = MainTab:CreateSection("Main")
 
