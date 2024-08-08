@@ -719,12 +719,14 @@ local function createESP(player)
     local function updateESP()
         if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
             local rootPart = player.Character.HumanoidRootPart
+            local head = player.Character:FindFirstChild("Head")
             local vector, onScreen = Camera:WorldToViewportPoint(rootPart.Position)
 
             if onScreen then
                 local size = Vector2.new(1000 / vector.Z, 1000 / vector.Z)
                 local position = Vector2.new(vector.X - size.X / 2, vector.Y - size.Y / 2)
-                local namePosition = Vector2.new(vector.X, vector.Y - size.Y / 2 - 25)  -- Adjusted height for the nameTag
+                local nameVector = Camera:WorldToViewportPoint(head.Position + Vector3.new(0, 1.5, 0))
+                local namePosition = Vector2.new(nameVector.X, nameVector.Y)
 
                 box.Size = size
                 box.Position = position
