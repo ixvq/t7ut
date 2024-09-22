@@ -913,13 +913,18 @@ local localPlayer = players.LocalPlayer
 local aiming = false
 local aimSpeed = 0 -- Set to 0 for instant aiming
 
--- Function to get the closest player
+-- Function to get the closest player who isn't on the same team
 local function getClosestPlayer()
     local closestPlayer = nil
     local shortestDistance = math.huge
 
     for _, player in pairs(players:GetPlayers()) do
-        if player ~= localPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        -- Make sure the player isn't the local player and is alive, and that their team isn't the same as the local player's team
+        if player ~= localPlayer 
+           and player.Team ~= localPlayer.Team -- Check if the player is on a different team
+           and player.Character 
+           and player.Character:FindFirstChild("HumanoidRootPart") then
+            
             local targetPosition = player.Character.HumanoidRootPart.Position
             local playerPosition = localPlayer.Character.HumanoidRootPart.Position
             local distance = (targetPosition - playerPosition).Magnitude
