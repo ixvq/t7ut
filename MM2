@@ -946,3 +946,6 @@ end)
 tool.Unequipped:Connect(function()
     detachPart()
 end)
+
+   end,
+})
