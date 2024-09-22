@@ -904,8 +904,9 @@ end)
 local holdunanchoredButton = MainTab:CreateButton({
    Name = "hold unanchored",
    Callback = function()
-      -- Create a tool first in Roblox Studio and add this script to the tool
-local tool = script.Parent
+      -- This script should be a LocalScript and placed inside the Tool in StarterPack
+
+local tool = script.Parent -- Ensure the script is inside the Tool
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
@@ -930,7 +931,7 @@ local function attachPart()
             weld.Part1 = partToMove
             weld.Parent = humanoidRootPart
 
-            -- Move the part to where the player is (optional)
+            -- Move the part to where the player is
             partToMove.CFrame = humanoidRootPart.CFrame
 
             isWelded = true
@@ -945,12 +946,10 @@ local function detachPart()
         weld:Destroy()
         weld = nil
         isWelded = false
-
-        -- After detaching, the part will still be unanchored, allowing free movement
     end
 end
 
--- Equip and Unequip events for the tool
+-- Equip and Unequip events for the tool (fixing the Equip callback issue)
 tool.Equipped:Connect(function()
     attachPart()
 end)
