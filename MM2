@@ -862,29 +862,48 @@ end)
    end,
 })
 
-local GrabGunButton = CombatTab:CreateButton({
-   Name = "Grab Gun",
+local KillAllButton = CombatTab:CreateButton({
+   Name = "kill all",
    Callback = function()
-      local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local originalPosition = nil
+      local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local KnifeTool = LocalPlayer.Backpack:FindFirstChild("Knife") or LocalPlayer.Character:FindFirstChild("Knife") -- Assuming a knife is in the player's backpack or character
+local DamageAmount = 100 -- Amount of damage to deal per attack (this can be set to the knife's damage value)
 
--- Function to teleport to the gun
-local function teleportToGun(gun)
-    originalPosition = character.HumanoidRootPart.CFrame
-    character.HumanoidRootPart.CFrame = gun.CFrame + Vector3.new(0, 0.5, 0) -- Teleport slightly above the gun's position
-
-    wait(0.5) -- Wait for 0.5 seconds
-
-    character.HumanoidRootPart.CFrame = originalPosition -- Teleport back to original position
+-- Function to kill a player
+local function killPlayer(targetPlayer)
+    if targetPlayer.Character and targetPlayer.Character:FindFirstChild("Humanoid") then
+        local humanoid = targetPlayer.Character.Humanoid
+        humanoid:TakeDamage(DamageAmount)
+        print("Killed player: " .. targetPlayer.Name)
+    end
 end
 
--- Detect when a gun is dropped (This part depends on your specific game and may need adjustments)
-game.Workspace.ChildAdded:Connect(function(child)
-    if child:IsA("Part") and child.Name == "Gun" then
-        teleportToGun(child)
+-- Function to kill all players on the map
+local function killAllPlayers()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then -- Don't kill yourself
+            killPlayer(player)
+        end
     end
-end)
+end
+
+-- Trigger the kill-all function (you can bind this to an action like a key press or button click)
+local function onActivate()
+    if KnifeTool then
+        killAllPlayers()
+    else
+        print("Knife tool not found!")
+    end
+end
+
+-- Connect to tool activation (if the knife tool is equipped)
+if KnifeTool then
+    KnifeTool.Activated:Connect(onActivate)
+end
+
+-- If you want it to be automatic, just call killAllPlayers() directly like this:
+-- killAllPlayers()
 
    end,
 })
