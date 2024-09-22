@@ -709,88 +709,96 @@ local VisualsTab = Window:CreateTab("Visuals", nil) -- Title, Image
 local EspButton = VisualsTab:CreateButton({
    Name = "Esp",
    Callback = function()
-      local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local Camera = game:GetService("Workspace").CurrentCamera
+      local players = game:GetService("Players")
+local runService = game:GetService("RunService")
+local teamsService = game:GetService("Teams")
+local camera = game.Workspace.CurrentCamera
+local localPlayer = players.LocalPlayer
 
-local function createESP(player)
-    local box = Drawing.new("Square")
-    box.Visible = false
-    box.Color = Color3.fromRGB(0, 255, 0)  -- Default color: Green
-    box.Thickness = 2
-    box.Transparency = 1
-    box.Filled = false
+-- Define the team colors (you can add/change colors as needed)
+local teamColors = {
+    ["TRC"] = Color3.fromRGB(255, 0, 0),    -- Red
+    ["TBC"] = Color3.fromRGB(0, 0, 255),    -- Blue
+    ["TOC"] = Color3.fromRGB(255, 165, 0),  -- Orange
+    ["TPC"] = Color3.fromRGB(128, 0, 128),  -- Purple
+    ["TGC"] = Color3.fromRGB(0, 255, 0),    -- Green
+    ["TYC"] = Color3.fromRGB(255, 255, 0)   -- Yellow
+}
 
-    local nameTag = Drawing.new("Text")
-    nameTag.Visible = false
-    nameTag.Color = Color3.fromRGB(0, 255, 0)  -- Default color: Green
-    nameTag.Size = 20
-    nameTag.Center = true
-    nameTag.Outline = false  -- No outline
-    nameTag.Font = 5  -- Font 3 is smoother than Font 2
-    nameTag.Text = player.Name
+-- Function to create a nametag
+local function createNametag(player)
+    if player == localPlayer then return end -- Don't create nametags for yourself
 
-    local function updateESP()
-        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("Head") then
-            local rootPart = player.Character.HumanoidRootPart
-            local head = player.Character.Head
-            local rootVector, onScreen = Camera:WorldToViewportPoint(rootPart.Position)
-            local headVector = Camera:WorldToViewportPoint(head.Position + Vector3.new(0, 1, 0))  -- Slight offset for the name tag
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+    local humanoid = character:WaitForChild("Humanoid")
+    
+    -- Create the BillboardGui (nametag)
+    local billboardGui = Instance.new("BillboardGui")
+    billboardGui.Name = "Nametag"
+    billboardGui.Adornee = humanoidRootPart
+    billboardGui.Size = UDim2.new(0, 100, 0, 50)
+    billboardGui.StudsOffset = Vector3.new(0, 2, 0) -- Raise the nametag above the player
+    billboardGui.AlwaysOnTop = true
 
-            if onScreen then
-                local size = Vector2.new(1000 / rootVector.Z, 1000 / rootVector.Z)
-                local position = Vector2.new(rootVector.X - size.X / 2, rootVector.Y - size.Y / 2)
-                local namePosition = Vector2.new(headVector.X, headVector.Y - size.Y / 2 - 10)
+    -- Create the nametag frame
+    local frame = Instance.new("Frame", billboardGui)
+    frame.BackgroundTransparency = 0.5
+    frame.Size = UDim2.new(1, 0, 1, 0)
+    
+    -- Create a TextLabel for displaying player information (health, distance, name)
+    local nametagText = Instance.new("TextLabel", frame)
+    nametagText.Size = UDim2.new(1, 0, 1, 0)
+    nametagText.BackgroundTransparency = 1
+    nametagText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    nametagText.TextScaled = true
+    nametagText.Font = Enum.Font.SourceSansBold
+    nametagText.TextStrokeTransparency = 0.5
+    
+    -- Attach the BillboardGui to the player's character
+    billboardGui.Parent = humanoidRootPart
 
-                box.Size = size
-                box.Position = position
-                box.Visible = true
+    -- Function to update the nametag text
+    local function updateNametag()
+        local distance = math.floor((humanoidRootPart.Position - localPlayer.Character.HumanoidRootPart.Position).Magnitude)
+        local health = math.floor(humanoid.Health)
+        nametagText.Text = string.format("%s\nHP: %d\nDistance: %d studs", player.Name, health, distance)
 
-                nameTag.Position = namePosition
-                nameTag.Visible = true
-
-                if player.Backpack:FindFirstChild("Gun") or (player.Character:FindFirstChild("Gun") and player.Character.Gun.Parent == player.Character) then
-                    box.Color = Color3.fromRGB(0, 0, 255)  -- Blue for sheriff
-                    nameTag.Color = Color3.fromRGB(0, 0, 255)  -- Blue for sheriff
-                    box.Thickness = 2  -- Outline for blue
-                elseif player.Backpack:FindFirstChild("Knife") or (player.Character:FindFirstChild("Knife") and player.Character.Knife.Parent == player.Character) then
-                    box.Color = Color3.fromRGB(255, 0, 0)  -- Red for murderer
-                    nameTag.Color = Color3.fromRGB(255, 0, 0)  -- Red for murderer
-                    box.Thickness = 2  -- Outline for red
-                else
-                    box.Color = Color3.fromRGB(0, 255, 0)  -- Green for innocent
-                    nameTag.Color = Color3.fromRGB(0, 255, 0)  -- Green for innocent
-                    box.Thickness = 0  -- No outline for green
-                end
-            else
-                box.Visible = false
-                nameTag.Visible = false
-            end
+        -- Get the player's team and set the color based on the team
+        if player.Team and teamColors[player.Team.Name] then
+            frame.BackgroundColor3 = teamColors[player.Team.Name]
         else
-            box.Visible = false
-            nameTag.Visible = false
+            frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- Default to white if no team is found
         end
     end
-
-    RunService.RenderStepped:Connect(updateESP)
+    
+    -- Update nametag continuously
+    runService.RenderStepped:Connect(updateNametag)
 end
 
-for _, player in pairs(Players:GetPlayers()) do
-    if player ~= Players.LocalPlayer then
-        createESP(player)
-    end
+-- Create nametags for all existing players
+for _, player in pairs(players:GetPlayers()) do
+    createNametag(player)
 end
 
-Players.PlayerAdded:Connect(function(player)
-    if player ~= Players.LocalPlayer then
-        createESP(player)
+-- When a new player joins, create a nametag for them
+players.PlayerAdded:Connect(createNametag)
+
+-- When a player respawns, recreate their nametag
+players.PlayerRemoving:Connect(function(player)
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        local billboardGui = player.Character.HumanoidRootPart:FindFirstChild("Nametag")
+        if billboardGui then
+            billboardGui:Destroy() -- Remove the nametag when the player leaves
+        end
     end
 end)
 
-Players.PlayerRemoving:Connect(function(player)
-    if player ~= Players.LocalPlayer then
-        -- Clean up ESP box and nameTag when a player leaves
-    end
+-- Recreate nametag on respawn
+players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function()
+        createNametag(player)
+    end)
 end)
 
    end,
