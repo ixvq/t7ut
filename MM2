@@ -900,13 +900,13 @@ local fovRadius = 100 -- Define the radius of the FOV circle
 
 -- Create a white outline FOV circle with transparency inside
 local fovCircle = Drawing.new("Circle")
-fovCircle.Thickness = 2
-fovCircle.NumSides = 60
+fovCircle.Thickness = 3
+fovCircle.NumSides = 75
 fovCircle.Radius = fovRadius
 fovCircle.Color = Color3.new(1, 1, 1) -- White color for the outline
 fovCircle.Filled = false -- No fill to make the inside transparent
 fovCircle.Transparency = 1 -- Fully visible outline
-fovCircle.Visible = false -- Default to invisible, shows only in first-person mode
+fovCircle.Visible = true -- Default to invisible, shows only in first-person mode
 
 -- Function to check if the player is in first-person mode
 local function isInFirstPerson()
