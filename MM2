@@ -781,80 +781,81 @@ end)
    end,
 })
 
-local ChamsButton = VisualsTab:CreateButton({
-   Name = "Player chams",
+local TracersButton = VisualsTab:CreateButton({
+   Name = "Tracers",
    Callback = function()
       local Players = game:GetService("Players")
+local Teams = game:GetService("Teams")
 local RunService = game:GetService("RunService")
 
-local function createChams(player)
-    if player == Players.LocalPlayer then return end  -- Don't create chams for the local player
+-- Define a mapping between team names and colors
+local teamColors = {
+    Blue = Color3.fromRGB(0, 0, 255),      -- Blue
+    Red = Color3.fromRGB(255, 0, 0),       -- Red
+    Green = Color3.fromRGB(0, 255, 0),     -- Green
+    Orange = Color3.fromRGB(255, 165, 0),  -- Orange
+    Purple = Color3.fromRGB(128, 0, 128),  -- Purple
+    Yellow = Color3.fromRGB(255, 255, 0)   -- Yellow
+}
 
-    local highlight = Instance.new("Highlight")
-    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop  -- Makes it visible through walls
-    highlight.FillTransparency = 0.5  -- Semi-transparent chams
-    highlight.OutlineTransparency = 1  -- No outline
-    highlight.Parent = player.Character  -- Initially parent to the character
+-- Function to get the player's team color
+local function getTeamColor(player)
+    local team = player.Team
+    if team and teamColors[team.Name] then
+        return teamColors[team.Name]
+    else
+        return Color3.fromRGB(255, 255, 255) -- Default to white if no team or unknown color
+    end
+end
 
-    local function updateChams()
+-- Function to create tracer for a player
+local function createTracer(player)
+    local tracer = Instance.new("LineHandleAdornment")
+    tracer.Name = "Tracer"
+    tracer.Adornee = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    tracer.Parent = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    tracer.Length = 0 -- We'll set this in the update function
+    tracer.Color3 = getTeamColor(player) -- Set the tracer color according to the player's team
+    tracer.Thickness = 2 -- Adjust thickness as needed
+    tracer.Transparency = 0.5
+
+    -- Update the tracer on every render step
+    RunService.RenderStepped:Connect(function()
         if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            -- Attach highlight to the character if it got detached for any reason
-            if highlight.Adornee ~= player.Character then
-                highlight.Adornee = player.Character
-                highlight.Parent = player.Character
-            end
+            tracer.Adornee = player.Character.HumanoidRootPart
 
-            -- Determine the player's role and set the color
-            if player.Backpack:FindFirstChild("Gun") or (player.Character:FindFirstChild("Gun") and player.Character.Gun.Parent == player.Character) then
-                highlight.FillColor = Color3.fromRGB(0, 0, 255)  -- Blue for sheriff
-            elseif player.Backpack:FindFirstChild("Knife") or (player.Character:FindFirstChild("Knife") and player.Character.Knife.Parent == player.Character) then
-                highlight.FillColor = Color3.fromRGB(255, 0, 0)  -- Red for murderer
-            else
-                highlight.FillColor = Color3.fromRGB(0, 255, 0)  -- Green for innocent
-            end
-        else
-            highlight.Parent = nil  -- If the character is not valid, temporarily remove the highlight
+            -- Set the start and end points of the tracer (e.g., from camera to player)
+            local cameraPosition = workspace.CurrentCamera.CFrame.Position
+            local playerPosition = player.Character.HumanoidRootPart.Position
+            tracer.Length = (cameraPosition - playerPosition).Magnitude
         end
-    end
+    end)
 
-    -- Update chams every frame
-    local connection
-    connection = RunService.RenderStepped:Connect(function()
-        if not player or not player.Parent then
-            highlight:Destroy()  -- Clean up the highlight if the player leaves or is removed
-            connection:Disconnect()
-        else
-            updateChams()
-        end
+    -- Update the color of the tracer when the player's team changes
+    player:GetPropertyChangedSignal("Team"):Connect(function()
+        tracer.Color3 = getTeamColor(player)
     end)
 end
 
--- Apply chams to all existing players
-for _, player in pairs(Players:GetPlayers()) do
-    if player.Character then
-        createChams(player)
-    end
-    player.CharacterAdded:Connect(function()
-        createChams(player)
-    end)
-end
-
--- Apply chams to players who join later
+-- Listen for players being added and removed
 Players.PlayerAdded:Connect(function(player)
-    player.CharacterAdded:Connect(function()
-        createChams(player)
+    player.CharacterAdded:Connect(function(character)
+        createTracer(player)
     end)
 end)
 
--- Clean up chams when a player leaves
 Players.PlayerRemoving:Connect(function(player)
-    if player.Character then
-        local highlight = player.Character:FindFirstChildOfClass("Highlight")
-        if highlight then
-            highlight:Destroy()
-        end
+    if player.Character and player.Character:FindFirstChild("Tracer") then
+        player.Character.Tracer:Destroy()
     end
 end)
+
+-- Initialize existing players
+for _, player in ipairs(Players:GetPlayers()) do
+    if player.Character then
+        createTracer(player)
+    end
+end
 
    end,
 })
