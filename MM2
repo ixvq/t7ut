@@ -901,56 +901,48 @@ end)
    end,
 })
 
-local XrayButton = MainTab:CreateButton({
-   Name = "Xray",
+local HoldPartButton = MainTab:CreateButton({
+   Name = "hold part",
    Callback = function()
-      -- This script assumes you're using Roblox and the game objects are tagged with specific tags (like "Treasure").
--- The script highlights tagged objects when X-ray vision is activated.
+      -- Create a tool first in Roblox Studio and add this script to the tool
+local tool = script.Parent
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
-local Players = game:GetService("Players")
-local CollectionService = game:GetService("CollectionService")
-local RunService = game:GetService("RunService")
+-- This part will be the one you're "injecting" into
+local partToMove = game.Workspace:WaitForChild("Part") -- Change "Part" to the name of the part you're trying to move.
 
--- Function to activate X-ray vision
-local function activateXray(player)
-    for _, object in pairs(CollectionService:GetTagged("XrayObject")) do
-        if object:IsA("BasePart") then
-            object.Transparency = 0.5  -- Make objects semi-transparent
-            object.Material = Enum.Material.ForceField  -- Change material for X-ray effect
-            object.Color = Color3.fromRGB(255, 0, 0)  -- Change color for X-ray effect
-        end
+local weld = nil
+
+-- Function to attach part to player
+local function attachPart()
+    -- Make sure the part exists and the HumanoidRootPart exists
+    if partToMove and humanoidRootPart then
+        -- Create WeldConstraint
+        weld = Instance.new("WeldConstraint")
+        weld.Part0 = humanoidRootPart
+        weld.Part1 = partToMove
+        weld.Parent = humanoidRootPart
+
+        -- Move the part to where the player is (optional)
+        partToMove.CFrame = humanoidRootPart.CFrame
     end
 end
 
--- Function to deactivate X-ray vision
-local function deactivateXray(player)
-    for _, object in pairs(CollectionService:GetTagged("XrayObject")) do
-        if object:IsA("BasePart") then
-            object.Transparency = 0  -- Restore original transparency
-            object.Material = Enum.Material.Plastic  -- Restore original material
-            object.Color = Color3.fromRGB(255, 255, 255)  -- Restore original color
-        end
+-- Function to detach part
+local function detachPart()
+    if weld then
+        weld:Destroy()
+        weld = nil
     end
 end
 
--- Example of how to toggle X-ray vision with a key press (e.g., "X")
-local function onKeyPress(input, gameProcessedEvent)
-    if input.KeyCode == Enum.KeyCode.X then
-        if not xrayActive then
-            activateXray(Players.LocalPlayer)
-            xrayActive = true
-        else
-            deactivateXray(Players.LocalPlayer)
-            xrayActive = false
-        end
-    end
-end
+-- Equip and Unequip events for the tool
+tool.Equipped:Connect(function()
+    attachPart()
+end)
 
--- Connect key press to function
-game:GetService("UserInputService").InputBegan:Connect(onKeyPress)
-
--- Add X-ray objects to the CollectionService (this should be done in the game setup)
--- Example: CollectionService:AddTag(workspace.Treasure, "XrayObject")
-
-   end,
-})
+tool.Unequipped:Connect(function()
+    detachPart()
+end)
