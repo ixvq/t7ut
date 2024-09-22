@@ -940,15 +940,15 @@ local function aimAtPlayer()
     end
 end
 
--- Listen for mouse button press to start/stop aiming
+-- Listen for key press to start/stop aiming (E key)
 userInputService.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton2 then
+    if input.KeyCode == Enum.KeyCode.E then
         aiming = true
     end
 end)
 
 userInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton2 then
+    if input.KeyCode == Enum.KeyCode.E then
         aiming = false
     end
 end)
