@@ -906,13 +906,12 @@ local aimbotButton = MainTab:CreateButton({
    Callback = function()
       local userInputService = game:GetService("UserInputService")
 local players = game:GetService("Players")
-local tweenService = game:GetService("TweenService")
 local runService = game:GetService("RunService")
 local camera = game.Workspace.CurrentCamera
 local localPlayer = players.LocalPlayer
-local aimSpeed = 0.1 -- Lower value for smoother/faster aim transition
 
 local aiming = false
+local aimSpeed = 0 -- Set to 0 for instant aiming
 
 -- Function to get the closest player
 local function getClosestPlayer()
@@ -935,7 +934,7 @@ local function getClosestPlayer()
     return closestPlayer
 end
 
--- Function to aim smoothly at the closest player
+-- Function to aim instantly at the closest player
 local function aimAtPlayer()
     local closestPlayer = getClosestPlayer()
 
@@ -946,12 +945,8 @@ local function aimAtPlayer()
         -- Calculate the direction to the target
         local direction = (targetPosition - camera.CFrame.Position).Unit
 
-        -- Calculate the new camera orientation
-        local newCameraCFrame = CFrame.new(camera.CFrame.Position, camera.CFrame.Position + direction)
-
-        -- Smoothly move the camera to look at the target using a Tween
-        local tween = tweenService:Create(camera, TweenInfo.new(aimSpeed, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {CFrame = newCameraCFrame})
-        tween:Play()
+        -- Instantly update the camera to look at the target
+        camera.CFrame = CFrame.new(camera.CFrame.Position, camera.CFrame.Position + direction)
     end
 end
 
@@ -968,10 +963,10 @@ userInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- Update aiming every frame to ensure smooth transition
+-- Continuously update aiming to ensure fast aim
 runService.RenderStepped:Connect(function()
     if aiming then
-        aimAtPlayer() -- Continuously aim at the closest player every frame while aiming
+        aimAtPlayer() -- Instantly aim at the closest player every frame while aiming
     end
 end)
 
