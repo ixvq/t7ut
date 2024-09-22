@@ -652,50 +652,26 @@ RunService.RenderStepped:Connect(adjustAnimationSpeed)
 local SecurityTab = Window:CreateTab("Security", nil) -- Title, Image
 local SecuritySection = SecurityTab:CreateSection("Secure urself using this!")
 
-local AntiFlingButton = SecurityTab:CreateButton({
-   Name = "Anti Fling",
+local NoRecoilButton = SecurityTab:CreateButton({
+   Name = "No recoil",
    Callback = function()
          local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-local lastPosition = humanoidRootPart.Position
-local allowedDistance = 50 -- Maximum allowed distance change per frame
 
-local function antiFling()
-    RunService.Heartbeat:Connect(function()
-        local currentPosition = humanoidRootPart.Position
-        local distance = (currentPosition - lastPosition).Magnitude
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
 
-        if distance > allowedDistance then
-            humanoidRootPart.Velocity = Vector3.new(0, 0, 0)
-            humanoidRootPart.RotVelocity = Vector3.new(0, 0, 0)
-            humanoidRootPart.CFrame = CFrame.new(lastPosition)
-        else
-            lastPosition = currentPosition
-        end
+-- Function to disable camera recoil
+local function disableRecoil()
+    -- Disable recoil by overriding camera's CFrame changes related to recoil
+    RunService.RenderStepped:Connect(function()
+        -- Constantly set the camera's CFrame to its current value to prevent recoil
+        Camera.CFrame = Camera.CFrame
     end)
 end
 
-character.HumanoidRootPart.AncestryChanged:Connect(function()
-    if not character:IsDescendantOf(workspace) then
-        character = player.Character or player.CharacterAdded:Wait()
-        humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-        lastPosition = humanoidRootPart.Position
-    end
-end)
-
--- Ensure the anti-fling script runs
-player.CharacterAdded:Connect(function(char)
-    character = char
-    humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-    lastPosition = humanoidRootPart.Position
-    antiFling()
-end)
-
--- Initial run
-antiFling()
+-- Call this function to disable recoil
+disableRecoil()
 
    end,
 })
