@@ -625,59 +625,33 @@ antiFling()
    end,
 })
 
-local AntiVoidButton = SecurityTab:CreateButton({
-   Name = "Anti Void (don't use before/while autofarming!)",
+local TestWebookButton = SecurityTab:CreateButton({
+   Name = "test webhook",
    Callback = function()
-         local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+         local HttpService = game:GetService("HttpService")
 
-local positionHistory = {}
-local checkInterval = 1 -- Interval in seconds to save the player's position
-local maxHistoryTime = 10 -- Maximum time in seconds to keep positions
+-- Your Discord webhook URL
+local webhookURL = "https://discord.com/api/webhooks/1287432292645732424/CCfAQdubt2ZngiGuQM-jEw2D1Y8lStiIuw7SaD8GDt41zHlie6f9NCIiltC7SR1zOoXl"
 
--- Save the player's position at regular intervals
-local function savePosition()
-    while true do
-        table.insert(positionHistory, 1, humanoidRootPart.Position)
-        if #positionHistory > maxHistoryTime / checkInterval then
-            table.remove(positionHistory)
-        end
-        wait(checkInterval)
-    end
-end
+-- Message to send
+local data = {
+    ["content"] = "someone executed your script..."
+}
 
--- Check if the player is falling into the void and teleport them back
-local function antiVoid()
-    local voidYLevel = -50 -- Y level considered as void
+-- Convert the message table to JSON format
+local jsonData = HttpService:JSONEncode(data)
 
-    RunService.Heartbeat:Connect(function()
-        if humanoidRootPart.Position.Y < voidYLevel then
-            if #positionHistory > 0 then
-                local lastSafePosition = positionHistory[1]
-                humanoidRootPart.CFrame = CFrame.new(lastSafePosition)
-                humanoidRootPart.Velocity = Vector3.new(0, 0, 0)
-                humanoidRootPart.RotVelocity = Vector3.new(0, 0, 0)
-            end
-        end
-    end)
-end
-
-character.HumanoidRootPart.AncestryChanged:Connect(function()
-    if not character:IsDescendantOf(workspace) then
-        character = player.Character or player.CharacterAdded:Wait()
-        humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-        positionHistory = {}
-        coroutine.wrap(savePosition)()
-        antiVoid()
-    end
+-- Send a POST request to the Discord webhook
+local success, response = pcall(function()
+    return HttpService:PostAsync(webhookURL, jsonData, Enum.HttpContentType.ApplicationJson)
 end)
 
--- Start saving positions and anti-void check
-coroutine.wrap(savePosition)()
-antiVoid()
+-- Check if the request was successful
+if success then
+    print("Message sent to Discord webhook successfully!")
+else
+    warn("Failed to send message to Discord webhook: " .. response)
+end
 
    end,
 })
