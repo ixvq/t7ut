@@ -809,51 +809,70 @@ local function getTeamColor(player)
 end
 
 -- Function to create tracer for a player
-local function createTracer(player)
-    local tracer = Instance.new("LineHandleAdornment")
+local function createTracer(localPlayer, targetPlayer)
+    local tracer = Instance.new("Beam")
     tracer.Name = "Tracer"
-    tracer.Adornee = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-    tracer.Parent = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-    tracer.Length = 0 -- We'll set this in the update function
-    tracer.Color3 = getTeamColor(player) -- Set the tracer color according to the player's team
-    tracer.Thickness = 2 -- Adjust thickness as needed
-    tracer.Transparency = 0.5
+    tracer.FaceCamera = true
+    tracer.Color = ColorSequence.new(getTeamColor(targetPlayer))
+    tracer.Width0 = 0.1 -- Start width (thicker for better visibility)
+    tracer.Width1 = 0.1 -- End width
 
-    -- Update the tracer on every render step
-    RunService.RenderStepped:Connect(function()
-        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            tracer.Adornee = player.Character.HumanoidRootPart
+    -- Attach the beam to the torso (HumanoidRootPart) of both players
+    local attachment0 = Instance.new("Attachment")
+    local attachment1 = Instance.new("Attachment")
 
-            -- Set the start and end points of the tracer (e.g., from camera to player)
-            local cameraPosition = workspace.CurrentCamera.CFrame.Position
-            local playerPosition = player.Character.HumanoidRootPart.Position
-            tracer.Length = (cameraPosition - playerPosition).Magnitude
-        end
-    end)
+    -- Attach to the local player's torso (from where the tracer starts)
+    attachment0.Parent = localPlayer.Character:WaitForChild("HumanoidRootPart")
+    -- Attach to the target player's torso (where the tracer ends)
+    attachment1.Parent = targetPlayer.Character:WaitForChild("HumanoidRootPart")
 
-    -- Update the color of the tracer when the player's team changes
-    player:GetPropertyChangedSignal("Team"):Connect(function()
-        tracer.Color3 = getTeamColor(player)
+    -- Set the beam's attachments
+    tracer.Attachment0 = attachment0
+    tracer.Attachment1 = attachment1
+
+    tracer.Parent = localPlayer:WaitForChild("PlayerGui") -- Parent to PlayerGui to ensure it renders properly
+
+    -- Update the tracer color when the target player's team changes
+    targetPlayer:GetPropertyChangedSignal("Team"):Connect(function()
+        tracer.Color = ColorSequence.new(getTeamColor(targetPlayer))
     end)
 end
 
 -- Listen for players being added and removed
 Players.PlayerAdded:Connect(function(player)
     player.CharacterAdded:Connect(function(character)
-        createTracer(player)
+        -- Create tracers for all players, including new players
+        for _, otherPlayer in pairs(Players:GetPlayers()) do
+            if otherPlayer ~= player and otherPlayer.Character then
+                createTracer(player, otherPlayer) -- Tracer from new player to existing players
+                createTracer(otherPlayer, player) -- Tracer from existing players to new player
+            end
+        end
     end)
 end)
 
 Players.PlayerRemoving:Connect(function(player)
-    if player.Character and player.Character:FindFirstChild("Tracer") then
-        player.Character.Tracer:Destroy()
+    -- Destroy tracers when a player leaves
+    for _, localPlayer in pairs(Players:GetPlayers()) do
+        local gui = localPlayer:FindFirstChild("PlayerGui")
+        if gui then
+            for _, child in pairs(gui:GetChildren()) do
+                if child.Name == "Tracer" then
+                    child:Destroy()
+                end
+            end
+        end
     end
 end)
 
 -- Initialize existing players
 for _, player in ipairs(Players:GetPlayers()) do
     if player.Character then
-        createTracer(player)
+        for _, otherPlayer in pairs(Players:GetPlayers()) do
+            if otherPlayer ~= player and otherPlayer.Character then
+                createTracer(player, otherPlayer) -- Tracer from existing player to other existing players
+            end
+        end
     end
 end
 
