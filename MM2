@@ -125,33 +125,10 @@ teleportAboveCFrame(targetCFrame)
    end,
 })
 
-local VotingButton = MainTab:CreateButton({
-   Name = "Voting Room",
+local TriggerBotButton = MainTab:CreateButton({
+   Name = "Trigger bot",
    Callback = function()
-         local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-
--- Function to teleport the player 5 studs above the given CFrame
-local function teleportAboveCFrame(targetCFrame)
-    -- Offset the target CFrame by 5 studs in the Y-axis
-    local newCFrame = targetCFrame + Vector3.new(0, 5, 0)
-
-    -- Teleport the player's HumanoidRootPart to the new CFrame
-    humanoidRootPart.CFrame = newCFrame
-end
-
--- The specified CFrame to teleport above (Updated with the new CFrame)
-local targetCFrame = CFrame.new(
-    -109.785713, 141.04776, 81.8176041,  -- Position
-    0, -1, 0,                             -- Rotation matrix row 1
-    0, 0, 1,                             -- Rotation matrix row 2
-    -1, 0, 0                             -- Rotation matrix row 3
-)
-
--- Call the function to teleport
-teleportAboveCFrame(targetCFrame)
+         
    end,
 })
 
