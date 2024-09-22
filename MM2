@@ -901,8 +901,8 @@ end)
    end,
 })
 
-local holdunanchoredButton = MainTab:CreateButton({
-   Name = "hold unanchored",
+local aimbotButton = MainTab:CreateButton({
+   Name = "aimbot",
    Callback = function()
       local userInputService = game:GetService("UserInputService")
 local players = game:GetService("Players")
