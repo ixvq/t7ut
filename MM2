@@ -896,7 +896,6 @@ local camera = game.Workspace.CurrentCamera
 local localPlayer = players.LocalPlayer
 
 local aiming = false
-local aimSpeed = 0 -- Set to 0 for instant aiming
 local fovRadius = 100 -- Define the radius of the FOV circle
 
 -- Create a white outline FOV circle with transparency inside
@@ -907,7 +906,12 @@ fovCircle.Radius = fovRadius
 fovCircle.Color = Color3.new(1, 1, 1) -- White color for the outline
 fovCircle.Filled = false -- No fill to make the inside transparent
 fovCircle.Transparency = 1 -- Fully visible outline
-fovCircle.Visible = true -- Ensure it's visible
+fovCircle.Visible = false -- Default to invisible, shows only in first-person mode
+
+-- Function to check if the player is in first-person mode
+local function isInFirstPerson()
+    return camera.FieldOfView <= 70 -- Example FOV threshold for first-person, adjust as needed
+end
 
 -- Function to get the closest player who isn't on the same team and is within FOV
 local function getClosestPlayerInFOV()
@@ -986,13 +990,19 @@ end)
 
 -- Continuously update aiming and drawing FOV circle
 runService.RenderStepped:Connect(function()
-    -- Update FOV circle position to be in the center of the screen
-    fovCircle.Position = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)
+    -- Check if the player is in first-person mode
+    if isInFirstPerson() then
+        fovCircle.Visible = true -- Show the FOV circle only in first-person mode
+        -- Update FOV circle position to be in the center of the screen
+        fovCircle.Position = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)
 
-    -- Update visibility based on whether aiming or not
-    if aiming then
-        aimAtPlayerInFOV() -- Aim at the closest player within the FOV
-        killPlayerInFOV()   -- Kill the closest player within the FOV
+        -- Aim and kill players only when aiming
+        if aiming then
+            aimAtPlayerInFOV() -- Aim at the closest player within the FOV
+            killPlayerInFOV()   -- Kill the closest player within the FOV
+        end
+    else
+        fovCircle.Visible = false -- Hide the FOV circle when not in first-person mode
     end
 end)
 
