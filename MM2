@@ -125,44 +125,10 @@ teleportAboveCFrame(targetCFrame)
    end,
 })
 
-local 3rdPersonViewButton = MainTab:CreateButton({
-   Name = "3rd person view",
+local TriggerBotButton = MainTab:CreateButton({
+   Name = "Trigger bot",
    Callback = function()
-         local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-
-local LocalPlayer = Players.LocalPlayer
-local Camera = workspace.CurrentCamera
-
--- Third-person camera settings
-local minZoomDistance = 10 -- Minimum zoom distance (behind the character)
-local maxZoomDistance = 15 -- Maximum zoom distance (you can change this to customize the range)
-local cameraOffset = Vector3.new(0, 5, -10) -- Offset to position the camera behind the character
-
--- Function to set third-person view
-local function setThirdPersonView()
-    -- Set the CameraMode to Classic to allow 3rd person view
-    LocalPlayer.CameraMode = Enum.CameraMode.Classic
-
-    -- Set the minimum and maximum camera zoom distance
-    LocalPlayer.CameraMinZoomDistance = minZoomDistance
-    LocalPlayer.CameraMaxZoomDistance = maxZoomDistance
-
-    -- Update the camera on each frame
-    RunService.RenderStepped:Connect(function()
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            local humanoidRootPart = LocalPlayer.Character.HumanoidRootPart
-
-            -- Set the camera to a fixed position behind the player
-            local cameraPosition = humanoidRootPart.Position + cameraOffset
-            Camera.CFrame = CFrame.new(cameraPosition, humanoidRootPart.Position) -- Camera looks at the player
-        end
-    end)
-end
-
--- Call the function to set the camera to third-person view
-setThirdPersonView()
-
+         
    end,
 })
 
