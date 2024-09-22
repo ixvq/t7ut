@@ -897,9 +897,20 @@ local localPlayer = players.LocalPlayer
 
 local aiming = false
 local aimSpeed = 0 -- Set to 0 for instant aiming
+local fovRadius = 100 -- Define the radius of the FOV circle
 
--- Function to get the closest player who isn't on the same team
-local function getClosestPlayer()
+-- Create a white outline FOV circle with transparency inside
+local fovCircle = Drawing.new("Circle")
+fovCircle.Thickness = 2
+fovCircle.NumSides = 60
+fovCircle.Radius = fovRadius
+fovCircle.Color = Color3.new(1, 1, 1) -- White color
+fovCircle.Filled = false
+fovCircle.Transparency = 1 -- Fully transparent inside
+fovCircle.Visible = true
+
+-- Function to get the closest player who isn't on the same team and is within FOV
+local function getClosestPlayerInFOV()
     local closestPlayer = nil
     local shortestDistance = math.huge
 
@@ -911,12 +922,22 @@ local function getClosestPlayer()
            and player.Character:FindFirstChild("Head") then -- Target the Head part
             
             local targetPosition = player.Character.Head.Position
-            local playerPosition = localPlayer.Character.HumanoidRootPart.Position
-            local distance = (targetPosition - playerPosition).Magnitude
+            local screenPosition, onScreen = camera:WorldToViewportPoint(targetPosition)
+            
+            -- Check if the player is on the screen
+            if onScreen then
+                -- Calculate distance between player position and local player position
+                local playerPosition = localPlayer.Character.HumanoidRootPart.Position
+                local distance = (targetPosition - playerPosition).Magnitude
 
-            if distance < shortestDistance then
-                closestPlayer = player
-                shortestDistance = distance
+                -- Check if the player is within the FOV circle (by checking screen coordinates)
+                local centerX, centerY = camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2
+                local distanceFromCenter = ((screenPosition.X - centerX)^2 + (screenPosition.Y - centerY)^2)^0.5
+                
+                if distanceFromCenter <= fovRadius and distance < shortestDistance then
+                    closestPlayer = player
+                    shortestDistance = distance
+                end
             end
         end
     end
@@ -924,9 +945,9 @@ local function getClosestPlayer()
     return closestPlayer
 end
 
--- Function to aim instantly at the closest player's head
-local function aimAtPlayer()
-    local closestPlayer = getClosestPlayer()
+-- Function to aim instantly at the closest player's head (within FOV)
+local function aimAtPlayerInFOV()
+    local closestPlayer = getClosestPlayerInFOV()
 
     if closestPlayer and closestPlayer.Character and closestPlayer.Character:FindFirstChild("Head") then
         local targetPart = closestPlayer.Character.Head
@@ -937,6 +958,16 @@ local function aimAtPlayer()
 
         -- Instantly update the camera to look at the head
         camera.CFrame = CFrame.new(camera.CFrame.Position, camera.CFrame.Position + direction)
+    end
+end
+
+-- Function to kill the closest player (within FOV)
+local function killPlayerInFOV()
+    local closestPlayer = getClosestPlayerInFOV()
+
+    if closestPlayer and closestPlayer.Character and closestPlayer.Character:FindFirstChild("Humanoid") then
+        -- Kill the closest player within the FOV by setting their health to 0
+        closestPlayer.Character.Humanoid.Health = 0
     end
 end
 
@@ -953,10 +984,14 @@ userInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- Continuously update aiming to ensure fast aim
+-- Continuously update aiming and drawing FOV circle
 runService.RenderStepped:Connect(function()
+    -- Update FOV circle position to be in the center of the screen
+    fovCircle.Position = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)
+
     if aiming then
-        aimAtPlayer() -- Instantly aim at the closest player's head every frame while aiming
+        aimAtPlayerInFOV() -- Aim at the closest player within the FOV
+        killPlayerInFOV()   -- Kill the closest player within the FOV
     end
 end)
 
