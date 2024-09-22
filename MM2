@@ -901,8 +901,8 @@ end)
    end,
 })
 
-local XrayButton = MainTab:CreateButton({
-   Name = "Xray",
+local holdunanchoredButton = MainTab:CreateButton({
+   Name = "hold unanchored",
    Callback = function()
       -- Create a tool first in Roblox Studio and add this script to the tool
 local tool = script.Parent
