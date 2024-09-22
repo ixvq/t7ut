@@ -914,27 +914,39 @@ local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 local partToMove = game.Workspace:WaitForChild("Part") -- Change "Part" to the name of the part you're trying to move.
 
 local weld = nil
+local isWelded = false
 
 -- Function to attach part to player
 local function attachPart()
     -- Make sure the part exists and the HumanoidRootPart exists
     if partToMove and humanoidRootPart then
-        -- Create WeldConstraint
-        weld = Instance.new("WeldConstraint")
-        weld.Part0 = humanoidRootPart
-        weld.Part1 = partToMove
-        weld.Parent = humanoidRootPart
+        -- Unanchor the part so it can move freely with physics
+        partToMove.Anchored = false
 
-        -- Move the part to where the player is (optional)
-        partToMove.CFrame = humanoidRootPart.CFrame
+        -- Create WeldConstraint if it's not already welded
+        if not isWelded then
+            weld = Instance.new("WeldConstraint")
+            weld.Part0 = humanoidRootPart
+            weld.Part1 = partToMove
+            weld.Parent = humanoidRootPart
+
+            -- Move the part to where the player is (optional)
+            partToMove.CFrame = humanoidRootPart.CFrame
+
+            isWelded = true
+        end
     end
 end
 
 -- Function to detach part
 local function detachPart()
+    -- Destroy the weld if it exists
     if weld then
         weld:Destroy()
         weld = nil
+        isWelded = false
+
+        -- After detaching, the part will still be unanchored, allowing free movement
     end
 end
 
@@ -945,6 +957,18 @@ end)
 
 tool.Unequipped:Connect(function()
     detachPart()
+end)
+
+-- Adding a keybind for toggling anchoring of the part manually
+local UserInputService = game:GetService("UserInputService")
+
+UserInputService.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.E then
+        if partToMove then
+            -- Toggle Anchored property
+            partToMove.Anchored = not partToMove.Anchored
+        end
+    end
 end)
 
    end,
