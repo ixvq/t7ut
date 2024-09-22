@@ -904,10 +904,10 @@ local fovCircle = Drawing.new("Circle")
 fovCircle.Thickness = 2
 fovCircle.NumSides = 60
 fovCircle.Radius = fovRadius
-fovCircle.Color = Color3.new(1, 1, 1) -- White color
-fovCircle.Filled = false
-fovCircle.Transparency = 1 -- Fully transparent inside
-fovCircle.Visible = true
+fovCircle.Color = Color3.new(1, 1, 1) -- White color for the outline
+fovCircle.Filled = false -- No fill to make the inside transparent
+fovCircle.Transparency = 1 -- Fully visible outline
+fovCircle.Visible = true -- Ensure it's visible
 
 -- Function to get the closest player who isn't on the same team and is within FOV
 local function getClosestPlayerInFOV()
@@ -989,6 +989,7 @@ runService.RenderStepped:Connect(function()
     -- Update FOV circle position to be in the center of the screen
     fovCircle.Position = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)
 
+    -- Update visibility based on whether aiming or not
     if aiming then
         aimAtPlayerInFOV() -- Aim at the closest player within the FOV
         killPlayerInFOV()   -- Kill the closest player within the FOV
