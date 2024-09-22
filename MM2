@@ -652,27 +652,10 @@ RunService.RenderStepped:Connect(adjustAnimationSpeed)
 local SecurityTab = Window:CreateTab("Security", nil) -- Title, Image
 local SecuritySection = SecurityTab:CreateSection("Secure urself using this!")
 
-local NoRecoilButton = SecurityTab:CreateButton({
+local NoRecoilButton = MainTab:CreateButton({
    Name = "No recoil",
    Callback = function()
-         local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-
-local LocalPlayer = Players.LocalPlayer
-local Camera = workspace.CurrentCamera
-
--- Function to disable camera recoil
-local function disableRecoil()
-    -- Disable recoil by overriding camera's CFrame changes related to recoil
-    RunService.RenderStepped:Connect(function()
-        -- Constantly set the camera's CFrame to its current value to prevent recoil
-        Camera.CFrame = Camera.CFrame
-    end)
-end
-
--- Call this function to disable recoil
-disableRecoil()
-
+         print("working")
    end,
 })
 
