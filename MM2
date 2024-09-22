@@ -907,9 +907,12 @@ local aimbotButton = MainTab:CreateButton({
       local userInputService = game:GetService("UserInputService")
 local players = game:GetService("Players")
 local tweenService = game:GetService("TweenService")
+local runService = game:GetService("RunService")
 local camera = game.Workspace.CurrentCamera
 local localPlayer = players.LocalPlayer
-local aimSpeed = 0.3 -- Speed of the aim, lower values are slower (e.g., 0.1 is slower, 0.5 is faster)
+local aimSpeed = 0.1 -- Lower value for smoother/faster aim transition
+
+local aiming = false
 
 -- Function to get the closest player
 local function getClosestPlayer()
@@ -932,10 +935,10 @@ local function getClosestPlayer()
     return closestPlayer
 end
 
--- Function to aim at the closest player
+-- Function to aim smoothly at the closest player
 local function aimAtPlayer()
     local closestPlayer = getClosestPlayer()
-    
+
     if closestPlayer and closestPlayer.Character and closestPlayer.Character:FindFirstChild("HumanoidRootPart") then
         local targetPart = closestPlayer.Character.HumanoidRootPart
         local targetPosition = targetPart.Position
@@ -943,22 +946,32 @@ local function aimAtPlayer()
         -- Calculate the direction to the target
         local direction = (targetPosition - camera.CFrame.Position).Unit
 
-        -- Create a new CFrame that smoothly rotates the camera to look at the target
+        -- Calculate the new camera orientation
         local newCameraCFrame = CFrame.new(camera.CFrame.Position, camera.CFrame.Position + direction)
 
-        -- Tween the camera for smooth aiming
+        -- Smoothly move the camera to look at the target using a Tween
         local tween = tweenService:Create(camera, TweenInfo.new(aimSpeed, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {CFrame = newCameraCFrame})
         tween:Play()
     end
 end
 
--- Holding right mouse button to aim
+-- Listen for mouse button press to start/stop aiming
 userInputService.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
-        while userInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) do
-            aimAtPlayer()
-            wait(aimSpeed) -- Ensure smooth aiming with a delay matching the aim speed
-        end
+        aiming = true
+    end
+end)
+
+userInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then
+        aiming = false
+    end
+end)
+
+-- Update aiming every frame to ensure smooth transition
+runService.RenderStepped:Connect(function()
+    if aiming then
+        aimAtPlayer() -- Continuously aim at the closest player every frame while aiming
     end
 end)
 
