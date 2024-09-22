@@ -1,13 +1,13 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "print('made by t7u7')",
-   LoadingTitle = "t7u7 Hub",
-   LoadingSubtitle = "By t7u7",
+   Name = "Arsenal Private Script",
+   LoadingTitle = "Loading...",
+   LoadingSubtitle = "By t7ut",
    ConfigurationSaving = {
       Enabled = false,
       FolderName = nil, -- Create a custom folder for your hub/game
-      FileName = "scriptbyt7u7"
+      FileName = "scriptbyt7ut"
    },
    Discord = {
       Enabled = false,
@@ -16,10 +16,10 @@ local Window = Rayfield:CreateWindow({
    },
    KeySystem = false, -- Set this to true to use our key system
    KeySettings = {
-      Title = "MM2 Script | Key",
+      Title = "Arsenal Script | Key",
       Subtitle = "Key In Discord Server",
       Note = "Join Server From Misc Tab",
-      FileName = "loyalhubkey", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
+      FileName = "t7uthubkey", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
       SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
       GrabKeyFromSite = true, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
       Key = {"https://pastebin.com/GUqtT4VT"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
