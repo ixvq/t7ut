@@ -94,34 +94,11 @@ local JumpPowerSlider = MainTab:CreateSlider({
 })
 
 
-local TeleportSection = MainTab:CreateSection("Teleport Section")
-local LobbyButton = MainTab:CreateButton({
-   Name = "Lobby",
+local CheckSection = MainTab:CreateSection("Check")
+local PrintButton = MainTab:CreateButton({
+   Name = "Print",
    Callback = function()
-         local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-
--- Function to teleport the player 10 studs above the given CFrame
-local function teleportAboveCFrame(targetCFrame)
-    -- Offset the target CFrame by 10 studs in the Y-axis
-    local newCFrame = targetCFrame + Vector3.new(0, 10, 0)
-
-    -- Teleport the player's HumanoidRootPart to the new CFrame
-    humanoidRootPart.CFrame = newCFrame
-end
-
--- The specified CFrame to teleport above
-local targetCFrame = CFrame.new(
-    -122.343071, 136.772766, 1.38007069, -- Position
-    -0.499959469, 0, -0.866048813,       -- Rotation matrix row 1
-    0, 1, 0,                             -- Rotation matrix row 2
-    0.866048813, 0, -0.499959469         -- Rotation matrix row 3
-)
-
--- Call the function to teleport
-teleportAboveCFrame(targetCFrame)
+         print("hello")
 
    end,
 })
