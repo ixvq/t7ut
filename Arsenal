@@ -125,10 +125,85 @@ teleportAboveCFrame(targetCFrame)
    end,
 })
 
-local TriggerBotButton = MainTab:CreateButton({
-   Name = "Trigger bot",
+local ChamsButton = VisualsTab:CreateButton({
+   Name = "Chams",
    Callback = function()
-         
+         local Players = game:GetService("Players")
+local Teams = game:GetService("Teams")
+local RunService = game:GetService("RunService")
+
+-- Define a mapping between team names and colors
+local teamColors = {
+    Blue = Color3.fromRGB(0, 0, 255),   -- Blue team
+    Red = Color3.fromRGB(255, 0, 0),    -- Red team
+    Green = Color3.fromRGB(0, 255, 0),  -- Green team (example if needed)
+    Yellow = Color3.fromRGB(255, 255, 0) -- Yellow team (example if needed)
+}
+
+-- Function to get the team color for a player
+local function getTeamColor(player)
+    local team = player.Team
+    if team and teamColors[team.Name] then
+        return teamColors[team.Name]
+    else
+        return Color3.fromRGB(255, 255, 255) -- Default to white if team is not found
+    end
+end
+
+-- Function to create chams for a player (highlight effect)
+local function createChams(player)
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        -- Create the highlight instance
+        local highlight = Instance.new("Highlight")
+        highlight.Name = "TeamHighlight"
+        highlight.Adornee = player.Character
+        highlight.FillTransparency = 0.5 -- You can adjust transparency (0 = fully opaque, 1 = fully transparent)
+        highlight.OutlineTransparency = 0.1 -- Adjust for outline visibility
+
+        -- Set the initial color based on the player's team
+        highlight.FillColor = getTeamColor(player)
+        highlight.OutlineColor = highlight.FillColor -- Make the outline the same color as the fill
+
+        -- Parent the highlight to the player's character
+        highlight.Parent = player.Character
+
+        -- Update the highlight color if the player's team changes
+        player:GetPropertyChangedSignal("Team"):Connect(function()
+            highlight.FillColor = getTeamColor(player)
+            highlight.OutlineColor = highlight.FillColor
+        end)
+    end
+end
+
+-- Function to remove chams when a player leaves or dies
+local function removeChams(player)
+    if player.Character and player.Character:FindFirstChild("TeamHighlight") then
+        player.Character.TeamHighlight:Destroy()
+    end
+end
+
+-- Function to handle new players or respawned players
+local function onPlayerAdded(player)
+    player.CharacterAdded:Connect(function(character)
+        createChams(player)
+    end)
+
+    -- Remove chams when the player leaves
+    player.AncestryChanged:Connect(function()
+        removeChams(player)
+    end)
+end
+
+-- Set up chams for all players in the game
+Players.PlayerAdded:Connect(onPlayerAdded)
+
+-- Set chams for all current players in case the script starts after they've joined
+for _, player in ipairs(Players:GetPlayers()) do
+    if player.Character then
+        createChams(player)
+    end
+end
+
    end,
 })
 
@@ -625,33 +700,59 @@ antiFling()
    end,
 })
 
-local TestWebookButton = SecurityTab:CreateButton({
-   Name = "test webhook",
+local AntiVoidButton = SecurityTab:CreateButton({
+   Name = "Anti Void (don't use before/while autofarming!)",
    Callback = function()
-         local HttpService = game:GetService("HttpService")
+         local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
--- Your Discord webhook URL
-local webhookURL = "https://discord.com/api/webhooks/1287432292645732424/CCfAQdubt2ZngiGuQM-jEw2D1Y8lStiIuw7SaD8GDt41zHlie6f9NCIiltC7SR1zOoXl"
+local positionHistory = {}
+local checkInterval = 1 -- Interval in seconds to save the player's position
+local maxHistoryTime = 10 -- Maximum time in seconds to keep positions
 
--- Message to send
-local data = {
-    ["content"] = "someone executed your script..."
-}
+-- Save the player's position at regular intervals
+local function savePosition()
+    while true do
+        table.insert(positionHistory, 1, humanoidRootPart.Position)
+        if #positionHistory > maxHistoryTime / checkInterval then
+            table.remove(positionHistory)
+        end
+        wait(checkInterval)
+    end
+end
 
--- Convert the message table to JSON format
-local jsonData = HttpService:JSONEncode(data)
+-- Check if the player is falling into the void and teleport them back
+local function antiVoid()
+    local voidYLevel = -50 -- Y level considered as void
 
--- Send a POST request to the Discord webhook
-local success, response = pcall(function()
-    return HttpService:PostAsync(webhookURL, jsonData, Enum.HttpContentType.ApplicationJson)
+    RunService.Heartbeat:Connect(function()
+        if humanoidRootPart.Position.Y < voidYLevel then
+            if #positionHistory > 0 then
+                local lastSafePosition = positionHistory[1]
+                humanoidRootPart.CFrame = CFrame.new(lastSafePosition)
+                humanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+                humanoidRootPart.RotVelocity = Vector3.new(0, 0, 0)
+            end
+        end
+    end)
+end
+
+character.HumanoidRootPart.AncestryChanged:Connect(function()
+    if not character:IsDescendantOf(workspace) then
+        character = player.Character or player.CharacterAdded:Wait()
+        humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+        positionHistory = {}
+        coroutine.wrap(savePosition)()
+        antiVoid()
+    end
 end)
 
--- Check if the request was successful
-if success then
-    print("Message sent to Discord webhook successfully!")
-else
-    warn("Failed to send message to Discord webhook: " .. response)
-end
+-- Start saving positions and anti-void check
+coroutine.wrap(savePosition)()
+antiVoid()
 
    end,
 })
