@@ -93,16 +93,6 @@ local JumpPowerSlider = MainTab:CreateSlider({
    end,
 })
 
-
-local CheckSection = MainTab:CreateSection("Check")
-local PrintButton = MainTab:CreateButton({
-   Name = "Print",
-   Callback = function()
-         print("hello")
-
-   end,
-})
-
 local ChamsButton = VisualsTab:CreateButton({
    Name = "Chams",
    Callback = function()
