@@ -96,32 +96,67 @@ local JumpPowerSlider = MainTab:CreateSlider({
 
 local TeleportSection = MainTab:CreateSection("Teleport Section")
 local LobbyButton = MainTab:CreateButton({
-   Name = "Lobby",
+   Name = "Chams",
    Callback = function()
-         local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+         -- Initialize the Chams Script
+-- Assume the game has functions to iterate over players, check teams, and apply materials
 
--- Function to teleport the player 10 studs above the given CFrame
-local function teleportAboveCFrame(targetCFrame)
-    -- Offset the target CFrame by 10 studs in the Y-axis
-    local newCFrame = targetCFrame + Vector3.new(0, 10, 0)
-
-    -- Teleport the player's HumanoidRootPart to the new CFrame
-    humanoidRootPart.CFrame = newCFrame
+-- Function to detect team color
+function GetTeamColor(player)
+    if player.Team == "Green" then
+        return Color3.new(0, 1, 0)  -- Green
+    elseif player.Team == "Blue" then
+        return Color3.new(0, 0, 1)  -- Blue
+    elseif player.Team == "Red" then
+        return Color3.new(1, 0, 0)  -- Red
+    else
+        return Color3.new(1, 1, 1)  -- Default to White for unknown teams
+    end
 end
 
--- The specified CFrame to teleport above
-local targetCFrame = CFrame.new(
-    -122.343071, 136.772766, 1.38007069, -- Position
-    -0.499959469, 0, -0.866048813,       -- Rotation matrix row 1
-    0, 1, 0,                             -- Rotation matrix row 2
-    0.866048813, 0, -0.499959469         -- Rotation matrix row 3
-)
+-- Function to apply chams (highlights) to a player model
+function ApplyChamsToPlayer(player)
+    local teamColor = GetTeamColor(player)
+    
+    -- Loop through all parts of the player model
+    for _, part in pairs(player.Character:GetChildren()) do
+        if part:IsA("BasePart") then
+            -- Create a new highlight material or shader
+            local chamMaterial = Instance.new("Highlight")
+            chamMaterial.FillColor = teamColor  -- Set the team color
+            chamMaterial.FillTransparency = 0.5  -- Adjust transparency if needed
+            chamMaterial.OutlineTransparency = 1 -- Hide outline for clean look
+            chamMaterial.Parent = part  -- Apply the material to the part
+        end
+    end
+end
 
--- Call the function to teleport
-teleportAboveCFrame(targetCFrame)
+-- Main Loop to apply chams to all players
+function ApplyChamsToAllPlayers()
+    -- Get all players in the game
+    for _, player in pairs(game.Players:GetPlayers()) do
+        -- Check if player has a character model loaded
+        if player.Character and player.Character:FindFirstChild("Humanoid") then
+            -- Apply chams to the player
+            ApplyChamsToPlayer(player)
+        end
+    end
+end
+
+-- Listen for new players joining the game, and apply chams to them
+game.Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function(character)
+        -- Apply chams to the newly spawned player's character
+        ApplyChamsToPlayer(player)
+    end)
+end)
+
+-- Optionally, run this function periodically to ensure chams are always applied
+while true do
+    ApplyChamsToAllPlayers()
+    wait(1)  -- Adjust the wait time as needed
+end
+
    end,
 })
 
