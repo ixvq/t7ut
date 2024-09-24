@@ -98,64 +98,70 @@ local TeleportSection = MainTab:CreateSection("Teleport Section")
 local LobbyButton = MainTab:CreateButton({
    Name = "Chams",
    Callback = function()
-         -- Initialize the Chams Script
--- Assume the game has functions to iterate over players, check teams, and apply materials
+         -- Define the team colors
+local teamColors = {
+    TRC = Color3.new(0, 0, 1), -- Blue
+    TRB = Color3.new(1, 0, 0), -- Red
+    -- Add more teams as needed
+}
 
--- Function to detect team color
-function GetTeamColor(player)
-    if player.Team == "Green" then
-        return Color3.new(0, 1, 0)  -- Green
-    elseif player.Team == "Blue" then
-        return Color3.new(0, 0, 1)  -- Blue
-    elseif player.Team == "Red" then
-        return Color3.new(1, 0, 0)  -- Red
-    else
-        return Color3.new(1, 1, 1)  -- Default to White for unknown teams
-    end
-end
+-- Define the cham colors
+local chamColors = {
+    green = Color3.new(0, 1, 0),
+    blue = Color3.new(0, 0, 1),
+    red = Color3.new(1, 0, 0),
+    yellow = Color3.new(1, 1, 0),
+    purple = Color3.new(0.5, 0, 0.5),
+    orange = Color3.new(1, 0.5, 0),
+}
 
--- Function to apply chams (highlights) to a player model
-function ApplyChamsToPlayer(player)
-    local teamColor = GetTeamColor(player)
-    
-    -- Loop through all parts of the player model
-    for _, part in pairs(player.Character:GetChildren()) do
+-- Function to apply cham effect to a character
+local function applyCham(character, color)
+    -- Iterate over all character parts
+    for _, part in pairs(character:GetDescendants()) do
+        -- Check if the part is a BasePart
         if part:IsA("BasePart") then
-            -- Create a new highlight material or shader
-            local chamMaterial = Instance.new("Highlight")
-            chamMaterial.FillColor = teamColor  -- Set the team color
-            chamMaterial.FillTransparency = 0.5  -- Adjust transparency if needed
-            chamMaterial.OutlineTransparency = 1 -- Hide outline for clean look
-            chamMaterial.Parent = part  -- Apply the material to the part
+            -- Apply the cham effect
+            part.Material = Enum.Material.Neon
+            part.Color = color
         end
     end
 end
 
--- Main Loop to apply chams to all players
-function ApplyChamsToAllPlayers()
-    -- Get all players in the game
+-- Function to update the cham effect for all players
+local function updateChams()
+    -- Iterate over all players
     for _, player in pairs(game.Players:GetPlayers()) do
-        -- Check if player has a character model loaded
-        if player.Character and player.Character:FindFirstChild("Humanoid") then
-            -- Apply chams to the player
-            ApplyChamsToPlayer(player)
+        -- Get the player's character
+        local character = player.Character
+        if character then
+            -- Get the player's team
+            local team = game:GetService("Teams"):GetPlayerTeam(player)
+            if team then
+                -- Get the team color
+                local teamColor = teamColors[team.Name]
+                if teamColor then
+                    -- Apply the cham effect
+                    applyCham(character, teamColor)
+                end
+            end
         end
     end
 end
 
--- Listen for new players joining the game, and apply chams to them
+-- Update the cham effect every frame
+game:GetService("RunService").RenderStepped:Connect(updateChams)
+
+-- Update the cham effect when a player joins or leaves
 game.Players.PlayerAdded:Connect(function(player)
     player.CharacterAdded:Connect(function(character)
-        -- Apply chams to the newly spawned player's character
-        ApplyChamsToPlayer(player)
+        updateChams()
     end)
 end)
 
--- Optionally, run this function periodically to ensure chams are always applied
-while true do
-    ApplyChamsToAllPlayers()
-    wait(1)  -- Adjust the wait time as needed
-end
+game.Players.PlayerRemoving:Connect(function(player)
+    updateChams()
+end)
 
    end,
 })
