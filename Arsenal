@@ -166,10 +166,75 @@ end)
    end,
 })
 
-local TriggerBotButton = MainTab:CreateButton({
-   Name = "Trigger bot",
+local TracersButton = MainTab:CreateButton({
+   Name = "tracers",
    Callback = function()
-         
+         local teamColors = {
+    TRC = Color3.new(0, 0, 1), -- Blue
+    TRB = Color3.new(1, 0, 0), -- Red
+    -- Add more teams as needed
+}
+
+-- Define the trace colors
+local traceColors = {
+    green = Color3.new(0, 1, 0),
+    blue = Color3.new(0, 0, 1),
+    red = Color3.new(1, 0, 0),
+    yellow = Color3.new(1, 1, 0),
+    purple = Color3.new(0.5, 0, 0.5),
+    orange = Color3.new(1, 0.5, 0),
+}
+
+-- Get the local player
+local localPlayer = game.Players.LocalPlayer
+
+-- Get the local player's torso
+local localTorso = localPlayer.Character:WaitForChild("Torso")
+
+-- Function to draw a trace line to a player
+local function drawTrace(player)
+    -- Get the player's character
+    local character = player.Character
+    if character then
+        -- Get the player's team
+        local team = game:GetService("Teams"):GetPlayerTeam(player)
+        if team then
+            -- Get the team color
+            local teamColor = teamColors[team.Name]
+            if teamColor then
+                -- Get the player's torso
+                local torso = character:FindFirstChild("Torso")
+                if torso then
+                    -- Create a new line
+                    local line = Instance.new("Line")
+                    line.Color = teamColor
+                    line.Thickness = 0.5
+                    line.Parent = workspace
+
+                    -- Update the line every frame
+                    game:GetService("RunService").RenderStepped:Connect(function()
+                        -- Update the line's points
+                        line.From = localTorso.Position
+                        line.To = torso.Position
+                    end)
+                end
+            end
+        end
+    end
+end
+
+-- Draw a trace line to every player
+for _, player in pairs(game.Players:GetPlayers()) do
+    if player ~= localPlayer then
+        drawTrace(player)
+    end
+end
+
+-- Draw a trace line to new players when they join
+game.Players.PlayerAdded:Connect(function(player)
+    drawTrace(player)
+end)
+
    end,
 })
 
