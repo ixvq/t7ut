@@ -98,70 +98,37 @@ local TeleportSection = MainTab:CreateSection("Teleport Section")
 local LobbyButton = MainTab:CreateButton({
    Name = "Chams",
    Callback = function()
-         -- Define the team colors
-local teamColors = {
-    TRC = Color3.new(0, 0, 1), -- Blue
-    TRB = Color3.new(1, 0, 0), -- Red
-    -- Add more teams as needed
-}
+         local player = game.Players.LocalPlayer
 
--- Define the cham colors
-local chamColors = {
-    green = Color3.new(0, 1, 0),
-    blue = Color3.new(0, 0, 1),
-    red = Color3.new(1, 0, 0),
-    yellow = Color3.new(1, 1, 0),
-    purple = Color3.new(0.5, 0, 0.5),
-    orange = Color3.new(1, 0.5, 0),
-}
-
--- Function to apply cham effect to a character
-local function applyCham(character, color)
-    -- Iterate over all character parts
-    for _, part in pairs(character:GetDescendants()) do
-        -- Check if the part is a BasePart
+-- Function to create chams effect
+local function createChams(character)
+    for _, part in ipairs(character:GetDescendants()) do
         if part:IsA("BasePart") then
-            -- Apply the cham effect
-            part.Material = Enum.Material.Neon
-            part.Color = color
+            -- Create a new part to represent the chams
+            local chamPart = part:Clone()
+            chamPart.Transparency = 0.5 -- Set transparency to 50%
+            chamPart.BrickColor = BrickColor.new("Bright orange") -- Set color to orange
+            chamPart.Material = Enum.Material.Neon -- Optional: Set material to neon for better visibility
+            chamPart.Parent = workspace -- Parent the cham part to the workspace
+            chamPart.CFrame = part.CFrame -- Match the position of the original part
+
+            -- Update cham part position and orientation
+            chamPart.Anchored = true
+            chamPart.CanCollide = false
         end
     end
 end
 
--- Function to update the cham effect for all players
-local function updateChams()
-    -- Iterate over all players
-    for _, player in pairs(game.Players:GetPlayers()) do
-        -- Get the player's character
-        local character = player.Character
-        if character then
-            -- Get the player's team
-            local team = game:GetService("Teams"):GetPlayerTeam(player)
-            if team then
-                -- Get the team color
-                local teamColor = teamColors[team.Name]
-                if teamColor then
-                    -- Apply the cham effect
-                    applyCham(character, teamColor)
-                end
-            end
-        end
-    end
+-- Connect to character added event
+player.CharacterAdded:Connect(function(character)
+    wait(1) -- Wait for the character to load
+    createChams(character)
+end)
+
+-- If the character is already loaded
+if player.Character then
+    createChams(player.Character)
 end
-
--- Update the cham effect every frame
-game:GetService("RunService").RenderStepped:Connect(updateChams)
-
--- Update the cham effect when a player joins or leaves
-game.Players.PlayerAdded:Connect(function(player)
-    player.CharacterAdded:Connect(function(character)
-        updateChams()
-    end)
-end)
-
-game.Players.PlayerRemoving:Connect(function(player)
-    updateChams()
-end)
 
    end,
 })
@@ -764,7 +731,7 @@ end
 
 local VisualsTab = Window:CreateTab("Visuals", nil) -- Title, Image
 local EspButton = VisualsTab:CreateButton({
-   Name = "Esp",
+   Name = "Player Info",
    Callback = function()
       local players = game:GetService("Players")
 local runService = game:GetService("RunService")
