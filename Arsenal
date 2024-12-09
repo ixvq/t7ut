@@ -98,37 +98,68 @@ local TeleportSection = MainTab:CreateSection("Teleport Section")
 local LobbyButton = MainTab:CreateButton({
    Name = "Chams",
    Callback = function()
-         local player = game.Players.LocalPlayer
+         -- LocalScript in StarterPlayerScripts
 
--- Function to create chams effect
-local function createChams(character)
-    for _, part in ipairs(character:GetDescendants()) do
-        if part:IsA("BasePart") then
-            -- Create a new part to represent the chams
-            local chamPart = part:Clone()
-            chamPart.Transparency = 0.5 -- Set transparency to 50%
-            chamPart.BrickColor = BrickColor.new("Bright orange") -- Set color to orange
-            chamPart.Material = Enum.Material.Neon -- Optional: Set material to neon for better visibility
-            chamPart.Parent = workspace -- Parent the cham part to the workspace
-            chamPart.CFrame = part.CFrame -- Match the position of the original part
+-- Function to create the ESP for a player
+local function createESP(player)
+    -- Check if the player is visible (through walls)
+    local function isPlayerVisible()
+        local camera = game.Workspace.CurrentCamera
+        local playerHead = player.Character and player.Character:FindFirstChild("Head")
 
-            -- Update cham part position and orientation
-            chamPart.Anchored = true
-            chamPart.CanCollide = false
+        if playerHead then
+            -- Cast a ray from the camera to the player’s head
+            local ray = Ray.new(camera.CFrame.Position, (playerHead.Position - camera.CFrame.Position).unit * 500)
+            local hitPart = workspace:FindPartOnRay(ray)
+            
+            -- If the ray hits something other than the player's head, consider them blocked by a wall
+            return hitPart and hitPart:IsDescendantOf(player.Character) == false
         end
+
+        return true
     end
+
+    -- If the player is not visible (blocked by a wall), don't create ESP
+    if not isPlayerVisible() then return end
+
+    -- Create BillboardGui to display ESP
+    local espGui = Instance.new("BillboardGui")
+    espGui.Adornee = player.Character:WaitForChild("Head")
+    espGui.Size = UDim2.new(0, 100, 0, 100) -- Size of the ESP box
+    espGui.StudsOffset = Vector3.new(0, 3, 0) -- Position above the player's head
+    espGui.AlwaysOnTop = true
+    espGui.Parent = player.Character:WaitForChild("Head")
+
+    -- Create a frame to act as the ESP box
+    local espFrame = Instance.new("Frame")
+    espFrame.Size = UDim2.new(1, 0, 1, 0) -- Full size of the BillboardGui
+    espFrame.BackgroundTransparency = 0.5 -- Slight transparency for visibility
+    espFrame.BackgroundColor3 = player.TeamColor.Color -- Set the color to the player's team color
+    espFrame.Parent = espGui
 end
 
--- Connect to character added event
-player.CharacterAdded:Connect(function(character)
-    wait(1) -- Wait for the character to load
-    createChams(character)
+-- Function to handle when a player joins the game
+local function onPlayerAdded(player)
+    -- Wait until the player has a character
+    player.CharacterAdded:Connect(function(character)
+        -- Wait for the player to be assigned to a team and create ESP
+        if player.Team then
+            createESP(player)
+        end
+    end)
+end
+
+-- Listen for when players join the game and add ESP for them
+game.Players.PlayerAdded:Connect(onPlayerAdded)
+
+-- Make sure to also handle new characters if they spawn during the game
+game.Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function()
+        if player.Team then
+            createESP(player)
+        end
+    end)
 end)
-
--- If the character is already loaded
-if player.Character then
-    createChams(player.Character)
-end
 
    end,
 })
